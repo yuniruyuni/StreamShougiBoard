@@ -1,0 +1,30 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+*.pid
+.DS_Store
+
+# Dependency directories
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Client build output embedded into the executable
+/client/static/*
+!/client/static/.gitkeep
+
+# Generated license inventory embedded into the executable
+/app/assets/third-party-licenses.generated.html
+
+# Rust
+/app/target/
+
+# Compiled executable
+/dist/
+
+# Test coverage
+coverage/
+*.lcov

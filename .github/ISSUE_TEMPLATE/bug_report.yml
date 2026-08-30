@@ -1,0 +1,43 @@
+name: バグ報告
+description: 期待どおりに動かない点を報告する
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        脆弱性の可能性がある問題は、ここではなく [Security Policy](../blob/main/SECURITY.md) の
+        手順で非公開に報告してください。
+  - type: input
+    id: version
+    attributes:
+      label: StreamShougiBoard のバージョン
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows と OBS Studio のバージョン
+      placeholder: Windows 11 24H2 / OBS Studio 31.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待した動作と実際の動作
+    validations:
+      required: true
+  - type: input
+    id: sfen
+    attributes:
+      label: 局面の SFEN（あれば）
+      description: 操作画面の「現在の SFEN をコピー」で取れます。

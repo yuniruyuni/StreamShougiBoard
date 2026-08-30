@@ -1,0 +1,12 @@
+# Release trust boundary. Enforce these entries with a protected-main ruleset.
+/.github/CODEOWNERS @yuniruyuni
+/.github/workflows/ @yuniruyuni
+/scripts/verify-release-on-main.sh @yuniruyuni
+/scripts/generate-third-party-notices.ts @yuniruyuni
+/about.toml @yuniruyuni
+/bun.lock @yuniruyuni
+/package.json @yuniruyuni
+/client/package.json @yuniruyuni
+/app/Cargo.toml @yuniruyuni
+/app/Cargo.lock @yuniruyuni
+/app/build.rs @yuniruyuni

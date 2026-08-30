@@ -1,0 +1,34 @@
+{
+  "name": "stream-shougi-board",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "bun@1.4.0",
+  "license": "MIT",
+  "repository": "https://github.com/yuniruyuni/StreamShougiBoard",
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "build": "bun run prepare:assets && bun run build:app",
+    "build:app": "cargo build --release --locked --manifest-path app/Cargo.toml",
+    "build:client": "bun run --cwd client build",
+    "build:exe": "bun run prepare:assets && cargo build --release --locked --manifest-path app/Cargo.toml --target x86_64-pc-windows-gnu",
+    "check": "bun run check:version && bun run prepare:assets && bun run check:type && bun run check:lint && bun run check:test",
+    "check:lint": "biome check .",
+    "check:test": "bun run --filter '*' check:test",
+    "check:type": "bun run --filter '*' check:type",
+    "check:version": "bun scripts/check-versions.ts",
+    "fix:lint": "biome check --write .",
+    "generate:icon": "bun scripts/generate-icon.ts",
+    "generate:licenses": "bun scripts/generate-third-party-notices.ts",
+    "prepare:assets": "bun run prepare:cargo && bun run generate:licenses && bun run build:client",
+    "prepare:cargo": "cargo fetch --locked --manifest-path app/Cargo.toml",
+    "watch:run": "bun scripts/watch.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
+}

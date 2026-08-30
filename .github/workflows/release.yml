@@ -1,0 +1,154 @@
+name: Release
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  # 配布物は windows-msvc で作る。mingw のランタイムを一切挟まないため。
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    outputs:
+      asset: ${{ steps.package.outputs.asset }}
+
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release commit is contained in main
+        shell: bash
+        env:
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: bash scripts/verify-release-on-main.sh "$RELEASE_COMMIT" refs/remotes/origin/main
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: 1.97.1
+          components: clippy, rustfmt
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: app
+
+      - name: Install cargo-about
+        run: cargo install cargo-about --version 0.9.1 --locked --features cli
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check versions, types, lint, and client tests
+        run: bun run check
+
+      - name: Check Rust formatting
+        working-directory: app
+        run: cargo fmt --check
+
+      - name: Clippy
+        working-directory: app
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test
+        working-directory: app
+        run: cargo test --locked
+
+      - name: Build release executable
+        working-directory: app
+        run: cargo build --release --locked
+
+      - name: Verify version and stage release assets
+        id: package
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ($env:RELEASE_TAG -notmatch '^v(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$') {
+            throw "Release tag is not strict SemVer: $env:RELEASE_TAG"
+          }
+
+          # exe に埋め込まれる版と照合する。bun run check が package.json との一致も見ている。
+          $metadata = cargo metadata --manifest-path app/Cargo.toml --no-deps --format-version 1 |
+            ConvertFrom-Json
+          $package = $metadata.packages | Where-Object { $_.name -eq "stream-shougi-board" }
+          if ($null -eq $package) { throw "stream-shougi-board package was not found" }
+          if ("v$($package.version)" -ne $env:RELEASE_TAG) {
+            throw "Tag $env:RELEASE_TAG does not match Cargo version v$($package.version)"
+          }
+
+          $asset = "StreamShougiBoard-$env:RELEASE_TAG-windows-x64.exe"
+          New-Item -ItemType Directory -Force release | Out-Null
+          Copy-Item app/target/release/stream-shougi-board.exe "release/$asset"
+
+          # 利用者が配布物の同一性を確かめられるよう、チェックサムを同じ形式で並べる。
+          $hash = (Get-FileHash "release/$asset" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $asset" | Out-File -FilePath "release/$asset.sha256" -Encoding ascii -NoNewline
+
+          "asset=$asset" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Retain release assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: stream-shougi-board-release-${{ github.ref_name }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: stream-shougi-board-release-${{ github.ref_name }}
+          path: release
+
+      - name: Verify the asset set is complete
+        env:
+          RELEASE_ASSET: ${{ needs.build.outputs.asset }}
+        run: |
+          test -s "release/$RELEASE_ASSET"
+          test -s "release/$RELEASE_ASSET.sha256"
+          cd release && sha256sum --check "$RELEASE_ASSET.sha256"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_ASSET: ${{ needs.build.outputs.asset }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            "release/$RELEASE_ASSET#StreamShougiBoard for Windows x64" \
+            "release/$RELEASE_ASSET.sha256#SHA-256 checksum" \
+            --verify-tag \
+            --generate-notes \
+            --notes 'この実行ファイルにはコード署名がありません。ダウンロード後に SHA-256 を照合してください。同梱している第三者コンポーネントのライセンスは、起動後にタスクトレイの「第三者ライセンス...」から確認できます。' \
+            --title "StreamShougiBoard $RELEASE_TAG"

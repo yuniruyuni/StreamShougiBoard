@@ -1,0 +1,39 @@
+/*
+ * OBS Browser Source 専用。ページ背景は常に透過し、半透明の地はブラウザソースの
+ * 領域いっぱいへ .stage が敷く。盤の大きさは領域から決めるので、ここは中央へ置くだけ。
+ */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+.stage {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 400ms ease;
+}
+
+/* アプリを終了した後に古い盤面が配信へ残り続けないよう、猶予を過ぎたら消す。 */
+.stage--gone {
+  opacity: 0;
+}
+
+/* 盤はブラウザソースの領域から決めた実寸で描かれる。ここは中央へ置くだけ。 */
+.board {
+  display: block;
+}
+
+.board--animated .pieces > g {
+  transition: transform 180ms ease-out;
+}

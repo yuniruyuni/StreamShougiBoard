@@ -1,0 +1,80 @@
+name: Dependency audit
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "client/package.json"
+      - "bun.lock"
+      - "app/Cargo.toml"
+      - "app/Cargo.lock"
+      - ".github/workflows/security.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "client/package.json"
+      - "bun.lock"
+      - "app/Cargo.toml"
+      - "app/Cargo.lock"
+      - ".github/workflows/security.yml"
+  # 依存を変えていなくても、新しく公開された脆弱性を拾うため毎週回す。
+  schedule:
+    - cron: "37 18 * * 1"
+  workflow_dispatch:
+
+jobs:
+  rust:
+    name: RustSec
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: 1.97.1
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: app
+          cache-all-crates: true
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked --no-default-features
+
+      - name: Audit Rust dependencies
+        run: cargo audit --file app/Cargo.lock
+
+  bun:
+    name: Bun
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Audit dependencies
+        run: bun audit

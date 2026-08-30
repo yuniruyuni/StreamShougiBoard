@@ -1,0 +1,339 @@
+{
+  "type": "snapshot",
+  "appVersion": "0.0.0-fixture",
+  "rev": 6,
+  "board": {
+    "squares": [
+      {
+        "id": "p1",
+        "kind": "L",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p2",
+        "kind": "N",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p3",
+        "kind": "S",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p4",
+        "kind": "G",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p5",
+        "kind": "K",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p6",
+        "kind": "G",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p7",
+        "kind": "S",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p8",
+        "kind": "N",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p9",
+        "kind": "L",
+        "promoted": false,
+        "side": "w"
+      },
+      null,
+      {
+        "id": "p10",
+        "kind": "R",
+        "promoted": false,
+        "side": "w"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "id": "p30",
+        "kind": "B",
+        "promoted": true,
+        "side": "b"
+      },
+      null,
+      {
+        "id": "p12",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p13",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p14",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p15",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p16",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p17",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      null,
+      {
+        "id": "p19",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      {
+        "id": "p20",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "id": "p18",
+        "kind": "P",
+        "promoted": false,
+        "side": "w"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "id": "p23",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "id": "p21",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p22",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      null,
+      {
+        "id": "p24",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p25",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p26",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p27",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p28",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p29",
+        "kind": "P",
+        "promoted": false,
+        "side": "b"
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "id": "p31",
+        "kind": "R",
+        "promoted": false,
+        "side": "b"
+      },
+      null,
+      {
+        "id": "p32",
+        "kind": "L",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p33",
+        "kind": "N",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p34",
+        "kind": "S",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p35",
+        "kind": "G",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p36",
+        "kind": "K",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p37",
+        "kind": "G",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p38",
+        "kind": "S",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p39",
+        "kind": "N",
+        "promoted": false,
+        "side": "b"
+      },
+      {
+        "id": "p40",
+        "kind": "L",
+        "promoted": false,
+        "side": "b"
+      }
+    ],
+    "hands": {
+      "b": {
+        "R": [],
+        "B": [
+          {
+            "id": "p11",
+            "kind": "B",
+            "promoted": false,
+            "side": "b"
+          }
+        ],
+        "G": [],
+        "S": [],
+        "N": [],
+        "L": [],
+        "P": []
+      },
+      "w": {
+        "R": [],
+        "B": [],
+        "G": [],
+        "S": [],
+        "N": [],
+        "L": [],
+        "P": []
+      }
+    },
+    "turn": "w",
+    "moveNumber": 4,
+    "lastMove": {
+      "from": 64,
+      "to": 16
+    }
+  },
+  "view": {
+    "backgroundColor": "black",
+    "backgroundOpacity": 0,
+    "margin": 16,
+    "handLayout": "sides",
+    "showLastMove": true,
+    "showSelection": false,
+    "showCoordinates": true,
+    "flipped": false,
+    "animate": true
+  },
+  "selection": {
+    "kind": "hand",
+    "side": "b",
+    "pieceKind": "B"
+  },
+  "history": {
+    "index": 4,
+    "length": 5
+  },
+  "sfen": "lnsgkgsnl/1r5+B1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w B 4"
+}

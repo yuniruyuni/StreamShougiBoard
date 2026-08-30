@@ -1,0 +1,24 @@
+name: 改善提案
+description: 追加したい機能や改善したい点を提案する
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 困っていること
+      description: どんな場面で、何ができなくて困っているかを書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案する動き
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: 製品境界の確認
+      options:
+        - label: 公開 Web サービス、ログイン、外部 DB、LAN listener を必要としない提案です。
+        - label: 合法手の判定・王手の検出・手番の強制を必要としない提案です。

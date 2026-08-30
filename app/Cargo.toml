@@ -1,0 +1,41 @@
+[package]
+name = "stream-shougi-board"
+version = "0.1.0"
+edition = "2021"
+description = "OBS 連携ローカル将棋盤"
+license = "MIT"
+repository = "https://github.com/yuniruyuni/StreamShougiBoard"
+publish = false
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.8", features = ["ws"] }
+futures-util = "0.3"
+rust-embed = { version = "8", features = ["include-exclude"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt", "macros", "signal", "sync", "net", "time"] }
+
+[target.'cfg(windows)'.dependencies]
+known-folders = "1.4.2"
+
+[target.'cfg(windows)'.dependencies.windows]
+version = "0.62"
+features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_System_DataExchange",
+  "Win32_System_LibraryLoader",
+  "Win32_System_Memory",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+]
+
+# build script はホスト用にコンパイルされるため、ターゲット判定は build.rs 内で行う。
+[build-dependencies]
+embed-manifest = "1.4"
+winresource = { version = "0.1.31", default-features = false }
+
+[profile.release]
+lto = true
+strip = true

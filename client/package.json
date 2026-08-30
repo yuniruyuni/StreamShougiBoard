@@ -1,0 +1,23 @@
+{
+  "name": "@stream-shougi-board/client",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "watch:run": "bun run bin/build.ts --watch",
+    "build": "bun run bin/build.ts",
+    "check:lint": "biome check .",
+    "check:test": "bun test src/",
+    "check:type": "tsc --noEmit",
+    "fix:lint": "biome check --write ."
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.11",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^7.0.0"
+  }
+}
