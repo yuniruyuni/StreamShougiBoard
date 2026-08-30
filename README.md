@@ -60,7 +60,7 @@ SFEN の表示・コピー・貼り付けもでき、よく使う局面はブラ
 
 ```bash
 bun install --frozen-lockfile
-cargo install cargo-about --version 0.9.1 --locked --features cli
+bash scripts/install-cargo-about.sh   # 配布バイナリを取って入れる (cargo install でも可)
 
 bun run check        # 版の一致・型・lint・client のテスト
 cd app && cargo test # 盤面ロジックとプロトコルのテスト

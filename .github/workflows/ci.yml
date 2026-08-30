@@ -44,7 +44,8 @@ jobs:
           workspaces: app
 
       - name: Install cargo-about
-        run: cargo install cargo-about --version 0.9.1 --locked --features cli
+        shell: bash
+        run: bash scripts/install-cargo-about.sh
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -91,9 +92,13 @@ jobs:
         uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           workspaces: app
+          # Release の build ジョブと同じ鍵にして、タグを打った側が
+          # ここで温めた target をそのまま使えるようにする。
+          shared-key: windows-msvc
 
       - name: Install cargo-about
-        run: cargo install cargo-about --version 0.9.1 --locked --features cli
+        shell: bash
+        run: bash scripts/install-cargo-about.sh
 
       - name: Install dependencies
         run: bun install --frozen-lockfile

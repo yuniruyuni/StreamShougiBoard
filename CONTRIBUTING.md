@@ -23,7 +23,7 @@ Rust はリポジトリ直下の `rust-toolchain.toml` で 1.97.1、Bun は `pac
 
 ```bash
 bun install --frozen-lockfile
-cargo install cargo-about --version 0.9.1 --locked --features cli
+bash scripts/install-cargo-about.sh   # 配布バイナリを取って入れる (cargo install でも可)
 
 bun run check        # 版の一致 → prepare:assets → 型 → lint → client のテスト
 bun run watch:run    # http://127.0.0.1:16874/ が立つ

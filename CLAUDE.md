@@ -43,7 +43,7 @@ pure helpers; `client/src/protocol.ts` mirrors `app/src/protocol.rs`.
 
 ```bash
 bun install --frozen-lockfile
-cargo install cargo-about --version 0.9.1 --locked --features cli
+bash scripts/install-cargo-about.sh   # prebuilt binary; `cargo install cargo-about` also works
 
 bun run check          # version match → prepare:assets → type → lint → client tests
 bun run watch:run      # client bundle watch + cargo run

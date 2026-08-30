@@ -44,30 +44,32 @@ jobs:
         uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
         with:
           toolchain: 1.97.1
-          components: clippy, rustfmt
 
       - name: Cache Cargo
         uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           workspaces: app
+          # CI の windows ジョブと同じ鍵。main で通ったコミットにタグを打つので、
+          # そのとき温まった target をそのまま拾える。
+          shared-key: windows-msvc
 
       - name: Install cargo-about
-        run: cargo install cargo-about --version 0.9.1 --locked --features cli
+        shell: bash
+        run: bash scripts/install-cargo-about.sh
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Check versions, types, lint, and client tests
-        run: bun run check
+      # 版の一致と、exe へ焼くページの生成だけを行う。型・lint・client のテストは
+      # 同じコミットに対して CI が main で済ませている (このジョブの先頭で、タグが
+      # main に含まれることを確かめている)。
+      - name: Check version match
+        run: bun run check:version
 
-      - name: Check Rust formatting
-        working-directory: app
-        run: cargo fmt --check
+      - name: Build embedded assets
+        run: bun run prepare:assets
 
-      - name: Clippy
-        working-directory: app
-        run: cargo clippy --all-targets --locked -- -D warnings
-
+      # test だけは配布物そのものの正しさに関わるので、ここでも走らせる。
       - name: Test
         working-directory: app
         run: cargo test --locked
