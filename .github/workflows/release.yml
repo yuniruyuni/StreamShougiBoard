@@ -13,6 +13,52 @@ on:
       - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
+  # 配布物そのものの正しさを見る。build と待ち合う理由が無いので同時に走らせ、
+  # publish が両方の成功を待つ。public リポジトリの標準ランナーは無料なので、
+  # ジョブを増やしても縮むのは実時間だけ。
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          toolchain: 1.97.1
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        with:
+          workspaces: app
+          # CI の windows-check ジョブと同じ鍵。どちらも dev プロファイルを積む。
+          shared-key: windows-check
+
+      - name: Install cargo-about
+        shell: bash
+        run: bash scripts/install-cargo-about.sh
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build embedded assets
+        run: bun run prepare:assets
+
+      - name: Test
+        working-directory: app
+        run: cargo test --locked
+
   # 配布物は windows-msvc で作る。mingw のランタイムを一切挟まないため。
   build:
     runs-on: windows-latest
@@ -49,9 +95,9 @@ jobs:
         uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           workspaces: app
-          # CI の windows ジョブと同じ鍵。main で通ったコミットにタグを打つので、
+          # CI の windows-build ジョブと同じ鍵。main で通ったコミットにタグを打つので、
           # そのとき温まった target をそのまま拾える。
-          shared-key: windows-msvc
+          shared-key: windows-build
 
       - name: Install cargo-about
         shell: bash
@@ -68,11 +114,6 @@ jobs:
 
       - name: Build embedded assets
         run: bun run prepare:assets
-
-      # test だけは配布物そのものの正しさに関わるので、ここでも走らせる。
-      - name: Test
-        working-directory: app
-        run: cargo test --locked
 
       - name: Build release executable
         working-directory: app
@@ -118,7 +159,7 @@ jobs:
           compression-level: 0
 
   publish:
-    needs: build
+    needs: [build, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
