@@ -60,9 +60,12 @@ bun run build                                                   # ページの�
 ## プロトコルを変えるとき
 
 `app/src/protocol.rs`、`client/src/protocol.ts`、`docs/protocol.md` を同時に更新し、
-`PROTOCOL_VERSION` を両側で上げてから、
 `UPDATE_PROTOCOL_FIXTURES=1 cargo test` で `protocol-fixtures/snapshot.json` を作り直します。
 Rust 側と client 側のテストが同じ fixture を見ているので、片方だけ直すと必ず落ちます。
+
+別立てのプロトコル版はありません。ページは exe と同じビルドから配られるので、snapshot が
+アプリの版を運び、版の違うページは自分で 1 回読み直します。fixture の版は固定値なので、
+リリースのたびに作り直す必要はありません。
 
 ## 依存を足すとき
 

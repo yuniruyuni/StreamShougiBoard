@@ -52,9 +52,12 @@ bun run generate:licenses
 cd app
 cargo fmt --check
 cargo clippy --all-targets --locked -- -D warnings
-cargo clippy --all-targets --locked --target x86_64-pc-windows-msvc -- -D warnings
 cargo test --locked
 ```
+
+Windows-only code (tray, clipboard, `known-folders`) does not compile from Linux: `build.rs` needs
+that OS's resource compiler to embed the icon, so `--target x86_64-pc-windows-msvc` fails here. CI's
+`windows-check` job covers it.
 
 `bun run prepare:assets` must run before building the Rust binary in release mode: `rust-embed`
 pulls `client/static` into the executable. It first runs `generate:licenses`, because the client
