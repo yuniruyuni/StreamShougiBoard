@@ -43,12 +43,12 @@ Windows 実行ファイルは次で作れます。
 
 ```bash
 cargo build --release --locked --manifest-path app/Cargo.toml   # 今のプラットフォーム向け
-bun run build:exe                                               # WSL/Linux からクロスビルド
+bun run build                                                   # ページの生成を含めて同じもの
 ```
 
-クロスビルド (`x86_64-pc-windows-gnu`) は動作確認用です。配布物は Release workflow が
-`windows-latest` の MSVC ターゲットで作ったものを使ってください。mingw のランタイムを
-挟まないためです。
+どちらも今いるプラットフォーム向けです。Windows 実行ファイルを手元で作るなら Windows 上で
+叩いてください。配布物は Release workflow が `windows-latest` の MSVC ターゲットで作った
+ものを使ってください。mingw のランタイムを挟まないためです。
 
 `app/build.rs` が Windows のアイコンと版情報を埋め込みます。
 `app/assets/stream-shougi-board.ico` は Git 管理しているので、アイコンを変えるときだけ

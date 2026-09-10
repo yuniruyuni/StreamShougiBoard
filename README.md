@@ -79,9 +79,8 @@ release ビルドが exe へ埋め込みます。debug ビルドでは実行時�
 cargo build --release --locked --manifest-path app/Cargo.toml   # 今のプラットフォーム向け
 ```
 
-WSL や Linux からは `bun run build:exe` で Windows 向けにクロスビルドできます
-(mingw-w64 が要ります)。動作確認には使えますが、配布物は Release workflow が
-`windows-latest` の MSVC ターゲットで作ったものを使ってください。
+これは今いるプラットフォーム向けのビルドです。Windows 上で叩けば MSVC の exe ができます。
+配布物は Release workflow が `windows-latest` の MSVC ターゲットで作ったものを使ってください。
 
 タスクトレイは Windows でだけ動きます。Linux / macOS ではトレイを飛ばしてサーバーだけ起動するので、
 そのまま開発と動作確認ができます。

@@ -12,7 +12,7 @@
     "build": "bun run prepare:assets && bun run build:app",
     "build:app": "cargo build --release --locked --manifest-path app/Cargo.toml",
     "build:client": "bun run --cwd client build",
-    "build:exe": "bun run prepare:assets && cargo build --release --locked --manifest-path app/Cargo.toml --target x86_64-pc-windows-gnu",
+    "build:exe": "bun run build",
     "check": "bun run check:version && bun run prepare:assets && bun run check:type && bun run check:lint && bun run check:test",
     "check:lint": "biome check .",
     "check:test": "bun run --filter '*' check:test",
