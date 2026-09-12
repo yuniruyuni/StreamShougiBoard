@@ -56,7 +56,7 @@ SFEN の表示・コピー・貼り付けもでき、よく使う局面はブラ
 
 ## ソースからビルド
 
-必要なのは Rust 1.97.1 と Bun 1.4.0、それに `cargo-about 0.9.1` です。
+必要なのは Rust 1.98.1 と Bun 1.4.2、それに `cargo-about 0.9.1` です。
 
 ```bash
 bun install --frozen-lockfile

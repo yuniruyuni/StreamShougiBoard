@@ -18,8 +18,10 @@ StreamShougiBoard は、配信 PC の中だけで動くローカル完結型ア�
 
 ## 開発と検証
 
-Rust はリポジトリ直下の `rust-toolchain.toml` で 1.97.1、Bun は `package.json` の
-`packageManager` で 1.4.0 に固定しています。
+Rust はリポジトリ直下の `rust-toolchain.toml` で 1.98.1、Bun は `package.json` の
+`packageManager` で 1.4.2 に固定しています。どちらもワークフロー側にも同じ値を書くので、
+`bun run check:version` がずれていないか毎回確かめます (`rust-toolchain.toml` は
+ワークフローの `toolchain:` より優先されるため、ずれると入力と別の版でコンパイルされます)。
 
 ```bash
 bun install --frozen-lockfile
