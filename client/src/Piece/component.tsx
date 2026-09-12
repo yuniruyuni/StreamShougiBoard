@@ -15,6 +15,9 @@ import { type Kind, pieceKanji, type Side } from "~/shogi";
 /**
  * 駒形の五角形。上が尖った向き (自分から見て前) を 0 度とする。
  * 頂点・肩・底の比率は変えずに、マス目をほぼ埋める大きさまで広げてある。
+ *
+ * 0..1 の正方形の中に書き、外側で幅と高さを別々に掛ける。マスが縦長なので、
+ * 駒も同じだけ縦長になり、実物の駒の姿に近づく。
  */
 const KOMA_PATH =
   "M0.5 0.005 L0.824 0.144 L0.965 0.995 L0.035 0.995 L0.176 0.144 Z";
@@ -45,10 +48,11 @@ export interface PieceGlyphProps {
   promoted: boolean;
   side: Side;
   colors: BoardColors;
-  /** 駒を描く正方形の左上と一辺。 */
+  /** 駒を描く矩形の左上と寸法。 */
   x: number;
   y: number;
-  size: number;
+  width: number;
+  height: number;
   /** 0 か 180。後手の駒を上下反転させる。 */
   rotation: number;
   opacity?: number;
@@ -61,7 +65,8 @@ export function PieceGlyph({
   colors,
   x,
   y,
-  size,
+  width,
+  height,
   rotation,
   opacity,
 }: PieceGlyphProps) {
@@ -70,7 +75,7 @@ export function PieceGlyph({
 
   return (
     <g
-      transform={`translate(${x} ${y}) rotate(${rotation} ${size / 2} ${size / 2}) scale(${size})`}
+      transform={`translate(${x} ${y}) rotate(${rotation} ${width / 2} ${height / 2}) scale(${width} ${height})`}
       opacity={opacity}
       aria-label={`${side === "b" ? "先手" : "後手"}の${kanji}`}
     >

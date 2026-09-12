@@ -40,13 +40,22 @@ export interface BoardLayout {
   height: number;
   /** 9x9 の枠。 */
   board: Rect;
-  cell: number;
+  /** マスの幅。線の太さや文字の大きさは、すべてこれを基準に決める。 */
+  cellWidth: number;
+  /** マスの高さ。実物の盤に合わせて幅より少し高い。 */
+  cellHeight: number;
   /** index は Square。盤の反転はここで吸収済み。 */
   squares: Rect[];
   hands: HandSlot[];
   /** 駒台は板 1 枚として描き、当たり判定だけを hands の升で取る。 */
   handPlates: HandPlate[];
 }
+
+/**
+ * マスの縦横比 (高さ ÷ 幅)。実物の将棋盤のマスは正方形ではなく、わずかに縦長。
+ * 一般的な寸法の 3.03cm x 3.33cm から取っている。
+ */
+export const CELL_ASPECT = 1.1;
 
 /** 駒台の枠と盤との隙間を、マス目に対する比率で決める。 */
 const HAND_GAP_RATIO = 0.4;
@@ -58,8 +67,8 @@ const HAND_SLOTS = HAND_ORDER.length;
  */
 const COORD_GUTTER_RATIO = 0.45;
 
-function coordGutter(view: ViewSettings, cell: number): number {
-  return view.showCoordinates ? cell * COORD_GUTTER_RATIO : 0;
+function coordGutter(view: ViewSettings, cellWidth: number): number {
+  return view.showCoordinates ? cellWidth * COORD_GUTTER_RATIO : 0;
 }
 
 /**
@@ -76,15 +85,20 @@ export function pieceRotation(side: Side, flipped: boolean): number {
   return pointsUp ? 0 : 180;
 }
 
-function squareRects(board: Rect, cell: number, flipped: boolean): Rect[] {
+function squareRects(
+  board: Rect,
+  cellWidth: number,
+  cellHeight: number,
+  flipped: boolean,
+): Rect[] {
   const rects = new Array<Rect>(SQUARE_COUNT);
   for (let square = 0; square < SQUARE_COUNT; square += 1) {
     const index = displayIndex(square, flipped);
     rects[square] = {
-      x: board.x + (index % FILES) * cell,
-      y: board.y + Math.floor(index / FILES) * cell,
-      width: cell,
-      height: cell,
+      x: board.x + (index % FILES) * cellWidth,
+      y: board.y + Math.floor(index / FILES) * cellHeight,
+      width: cellWidth,
+      height: cellHeight,
     };
   }
   return rects;
@@ -108,17 +122,18 @@ function handPlate(
 function handSlots(
   side: Side,
   origin: Rect,
-  cell: number,
+  cellWidth: number,
+  cellHeight: number,
   vertical: boolean,
 ): HandSlot[] {
   return HAND_ORDER.map((kind, index) => ({
     side,
     kind,
     rect: {
-      x: origin.x + (vertical ? 0 : index * cell),
-      y: origin.y + (vertical ? index * cell : 0),
-      width: cell,
-      height: cell,
+      x: origin.x + (vertical ? 0 : index * cellWidth),
+      y: origin.y + (vertical ? index * cellHeight : 0),
+      width: cellWidth,
+      height: cellHeight,
     },
   }));
 }
@@ -126,20 +141,22 @@ function handSlots(
 function layoutSides(
   view: ViewSettings,
   boardSize: number,
-  cell: number,
+  cellWidth: number,
+  cellHeight: number,
 ): BoardLayout {
   const { margin, flipped } = view;
-  const gap = cell * HAND_GAP_RATIO;
-  const pad = cell * HAND_PAD_RATIO;
-  const gutter = coordGutter(view, cell);
-  const handWidth = cell + pad * 2;
-  const handHeight = HAND_SLOTS * cell + pad * 2;
+  const gap = cellWidth * HAND_GAP_RATIO;
+  const pad = cellWidth * HAND_PAD_RATIO;
+  const gutter = coordGutter(view, cellWidth);
+  const handWidth = cellWidth + pad * 2;
+  const handHeight = HAND_SLOTS * cellHeight + pad * 2;
+  const boardHeight = cellHeight * FILES;
 
   const board: Rect = {
     x: margin + handWidth + gap,
     y: margin + gutter,
     width: boardSize,
-    height: boardSize,
+    height: boardHeight,
   };
 
   // 手前 (盤の下側) の陣営の駒台を右下へ、相手の駒台を左上へ置く。
@@ -149,25 +166,26 @@ function layoutSides(
   const farOrigin = {
     x: margin + pad,
     y: board.y + pad,
-    width: cell,
-    height: cell,
+    width: cellWidth,
+    height: cellHeight,
   };
   const nearOrigin = {
     x: board.x + boardSize + gutter + gap + pad,
-    y: board.y + boardSize - handHeight + pad,
-    width: cell,
-    height: cell,
+    y: board.y + boardHeight - handHeight + pad,
+    width: cellWidth,
+    height: cellHeight,
   };
 
   return {
     width: margin * 2 + handWidth * 2 + gap * 2 + gutter + boardSize,
-    height: margin * 2 + gutter + boardSize,
+    height: margin * 2 + gutter + boardHeight,
     board,
-    cell,
-    squares: squareRects(board, cell, flipped),
+    cellWidth,
+    cellHeight,
+    squares: squareRects(board, cellWidth, cellHeight, flipped),
     hands: [
-      ...handSlots(far, farOrigin, cell, true),
-      ...handSlots(near, nearOrigin, cell, true),
+      ...handSlots(far, farOrigin, cellWidth, cellHeight, true),
+      ...handSlots(near, nearOrigin, cellWidth, cellHeight, true),
     ],
     handPlates: [
       handPlate(far, farOrigin, pad, handWidth, handHeight),
@@ -179,43 +197,51 @@ function layoutSides(
 function layoutStacked(
   view: ViewSettings,
   boardSize: number,
-  cell: number,
+  cellWidth: number,
+  cellHeight: number,
 ): BoardLayout {
   const { margin, flipped } = view;
-  const gap = cell * HAND_GAP_RATIO;
-  const pad = cell * HAND_PAD_RATIO;
-  const gutter = coordGutter(view, cell);
-  const handHeight = cell + pad * 2;
-  const handWidth = HAND_SLOTS * cell + pad * 2;
+  const gap = cellWidth * HAND_GAP_RATIO;
+  const pad = cellWidth * HAND_PAD_RATIO;
+  const gutter = coordGutter(view, cellWidth);
+  const handHeight = cellHeight + pad * 2;
+  const handWidth = HAND_SLOTS * cellWidth + pad * 2;
+  const boardHeight = cellHeight * FILES;
   const handX = margin + (boardSize - handWidth) / 2 + pad;
 
   const board: Rect = {
     x: margin,
     y: margin + handHeight + gap + gutter,
     width: boardSize,
-    height: boardSize,
+    height: boardHeight,
   };
 
   const near: Side = flipped ? "w" : "b";
   const far: Side = flipped ? "b" : "w";
 
-  const farOrigin = { x: handX, y: margin + pad, width: cell, height: cell };
+  const farOrigin = {
+    x: handX,
+    y: margin + pad,
+    width: cellWidth,
+    height: cellHeight,
+  };
   const nearOrigin = {
     x: handX,
-    y: board.y + boardSize + gap + pad,
-    width: cell,
-    height: cell,
+    y: board.y + boardHeight + gap + pad,
+    width: cellWidth,
+    height: cellHeight,
   };
 
   return {
     width: margin * 2 + boardSize + gutter,
-    height: margin * 2 + boardSize + gutter + (handHeight + gap) * 2,
+    height: margin * 2 + boardHeight + gutter + (handHeight + gap) * 2,
     board,
-    cell,
-    squares: squareRects(board, cell, flipped),
+    cellWidth,
+    cellHeight,
+    squares: squareRects(board, cellWidth, cellHeight, flipped),
     hands: [
-      ...handSlots(far, farOrigin, cell, false),
-      ...handSlots(near, nearOrigin, cell, false),
+      ...handSlots(far, farOrigin, cellWidth, cellHeight, false),
+      ...handSlots(near, nearOrigin, cellWidth, cellHeight, false),
     ],
     handPlates: [
       handPlate(far, farOrigin, pad, handWidth, handHeight),
@@ -232,10 +258,11 @@ export function computeLayout(
   view: ViewSettings,
   boardSize: number,
 ): BoardLayout {
-  const cell = boardSize / FILES;
+  const cellWidth = boardSize / FILES;
+  const cellHeight = cellWidth * CELL_ASPECT;
   return view.handLayout === "stacked"
-    ? layoutStacked(view, boardSize, cell)
-    : layoutSides(view, boardSize, cell);
+    ? layoutStacked(view, boardSize, cellWidth, cellHeight)
+    : layoutSides(view, boardSize, cellWidth, cellHeight);
 }
 
 /** これより小さくは描かない。潰れた盤を出すより、はみ出す方がまだ気づける。 */
@@ -266,7 +293,11 @@ export function boardSizeToFit(
     (width - inset * 2) / widthPerBoard,
     (height - inset * 2) / heightPerBoard,
   );
-  return Math.max(MIN_FITTED_BOARD_SIZE, fitted);
+
+  // 割ってから掛け直すと浮動小数の誤差で領域をわずかに超えることがある。
+  // 千分の一 px 単位へ切り捨てて、必ず内側に収まるようにする。
+  const trimmed = Math.floor(fitted * 1000) / 1000;
+  return Math.max(MIN_FITTED_BOARD_SIZE, trimmed);
 }
 
 /** 筋 (9..1) と段 (一..九) のラベル。反転時は並びも逆になる。 */

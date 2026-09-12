@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { DEFAULT_VIEW, squareAt, type ViewSettings } from "~/shogi";
 import {
   boardSizeToFit,
+  CELL_ASPECT,
   computeLayout,
   displayIndex,
   MIN_FITTED_BOARD_SIZE,
@@ -73,9 +74,16 @@ describe("座標の帯", () => {
 describe("computeLayout (左右の駒台)", () => {
   const layout = computeLayout(view({ handLayout: "sides" }), BOARD_SIZE);
 
-  test("マスは正方形で 81 個ある", () => {
+  test("マスは 81 個で、実物の盤と同じく少し縦長", () => {
     expect(layout.squares).toHaveLength(81);
-    expect(layout.cell).toBe(60);
+    expect(layout.cellWidth).toBe(BOARD_SIZE / 9);
+    expect(layout.cellHeight).toBeCloseTo(layout.cellWidth * CELL_ASPECT);
+    expect(layout.cellHeight).toBeGreaterThan(layout.cellWidth);
+  });
+
+  test("盤の枠は幅より高さが大きい", () => {
+    expect(layout.board.width).toBe(BOARD_SIZE);
+    expect(layout.board.height).toBeCloseTo(BOARD_SIZE * CELL_ASPECT);
   });
 
   test("9一 が盤の左上、1九 が右下", () => {
@@ -83,8 +91,8 @@ describe("computeLayout (左右の駒台)", () => {
     const bottomRight = layout.squares[squareAt(1, 9)];
     expect(topLeft).toMatchObject({ x: layout.board.x, y: layout.board.y });
     expect(bottomRight).toMatchObject({
-      x: layout.board.x + 8 * layout.cell,
-      y: layout.board.y + 8 * layout.cell,
+      x: layout.board.x + 8 * layout.cellWidth,
+      y: layout.board.y + 8 * layout.cellHeight,
     });
   });
 

@@ -103,14 +103,19 @@ interface PlacedPiece {
   piece: Piece;
   x: number;
   y: number;
-  size: number;
+  width: number;
+  height: number;
   rotation: number;
 }
 
-function centeredIn(rect: Rect, size: number): { x: number; y: number } {
+function centeredIn(
+  rect: Rect,
+  width: number,
+  height: number,
+): { x: number; y: number } {
   return {
-    x: rect.x + (rect.width - size) / 2,
-    y: rect.y + (rect.height - size) / 2,
+    x: rect.x + (rect.width - width) / 2,
+    y: rect.y + (rect.height - height) / 2,
   };
 }
 
@@ -129,13 +134,16 @@ function placePieces(
     const piece = pieceAt(board, square);
     const rect = layout.squares[square];
     if (piece === null || rect === undefined) continue;
-    const size = layout.cell * PIECE_SIZE_SCALE[piece.kind];
-    const { x, y } = centeredIn(rect, size);
+    const scale = PIECE_SIZE_SCALE[piece.kind];
+    const width = layout.cellWidth * scale;
+    const height = layout.cellHeight * scale;
+    const { x, y } = centeredIn(rect, width, height);
     placed.push({
       piece,
       x,
       y,
-      size,
+      width,
+      height,
       rotation: pieceRotation(piece.side, view.flipped),
     });
   }
@@ -144,13 +152,16 @@ function placePieces(
     const pieces = board.hands[slot.side][slot.kind];
     const top = pieces[pieces.length - 1];
     if (top === undefined) continue;
-    const size = layout.cell * PIECE_SIZE_SCALE[top.kind];
-    const { x, y } = centeredIn(slot.rect, size);
+    const scale = PIECE_SIZE_SCALE[top.kind];
+    const width = layout.cellWidth * scale;
+    const height = layout.cellHeight * scale;
+    const { x, y } = centeredIn(slot.rect, width, height);
     placed.push({
       piece: top,
       x,
       y,
-      size,
+      width,
+      height,
       rotation: pieceRotation(slot.side, view.flipped),
     });
   }
@@ -198,7 +209,7 @@ function HandPlates({
   layout: BoardLayout;
   colors: BoardColors;
 }) {
-  const inset = layout.cell * 0.05;
+  const inset = layout.cellWidth * 0.05;
 
   return (
     <g>
@@ -209,20 +220,20 @@ function HandPlates({
             y={plate.rect.y}
             width={plate.rect.width}
             height={plate.rect.height}
-            rx={layout.cell * 0.1}
+            rx={layout.cellWidth * 0.1}
             fill={`url(#${HAND_GRADIENT_ID})`}
             stroke={colors.handPlateEdge}
-            strokeWidth={Math.max(1, layout.cell * 0.024)}
+            strokeWidth={Math.max(1, layout.cellWidth * 0.024)}
           />
           <rect
             x={plate.rect.x + inset}
             y={plate.rect.y + inset}
             width={plate.rect.width - inset * 2}
             height={plate.rect.height - inset * 2}
-            rx={layout.cell * 0.07}
+            rx={layout.cellWidth * 0.07}
             fill="none"
             stroke={colors.handPlateInner}
-            strokeWidth={Math.max(1, layout.cell * 0.016)}
+            strokeWidth={Math.max(1, layout.cellWidth * 0.016)}
           />
         </g>
       ))}
@@ -237,29 +248,29 @@ function GridLines({
   layout: BoardLayout;
   colors: BoardColors;
 }) {
-  const { board, cell } = layout;
-  const width = Math.max(1, cell * 0.018);
+  const { board, cellWidth, cellHeight } = layout;
+  const width = Math.max(1, cellWidth * 0.018);
   const lines: { x1: number; y1: number; x2: number; y2: number }[] = [];
 
   for (let i = 0; i <= 9; i += 1) {
     lines.push({
-      x1: board.x + i * cell,
+      x1: board.x + i * cellWidth,
       y1: board.y,
-      x2: board.x + i * cell,
+      x2: board.x + i * cellWidth,
       y2: board.y + board.height,
     });
     lines.push({
       x1: board.x,
-      y1: board.y + i * cell,
+      y1: board.y + i * cellHeight,
       x2: board.x + board.width,
-      y2: board.y + i * cell,
+      y2: board.y + i * cellHeight,
     });
   }
 
   const stars = [3, 6].flatMap((row) =>
     [3, 6].map((col) => ({
-      cx: board.x + col * cell,
-      cy: board.y + row * cell,
+      cx: board.x + col * cellWidth,
+      cy: board.y + row * cellHeight,
     })),
   );
 
@@ -285,7 +296,7 @@ function GridLines({
           key={`star-${star.cx}-${star.cy}`}
           cx={star.cx}
           cy={star.cy}
-          r={cell * 0.045}
+          r={cellWidth * 0.045}
           fill={colors.starColor}
         />
       ))}
@@ -302,14 +313,14 @@ function Coordinates({
   colors: BoardColors;
   view: ViewSettings;
 }) {
-  const { board, cell } = layout;
-  const fontSize = cell * 0.3;
+  const { board, cellWidth, cellHeight } = layout;
+  const fontSize = cellWidth * 0.3;
 
   const labels = [
     ...fileLabels(view.flipped).map((label, index) => ({
       key: `file-${label}`,
       text: label,
-      x: board.x + (index + 0.5) * cell,
+      x: board.x + (index + 0.5) * cellWidth,
       y: board.y - fontSize * 0.5,
       baseline: "middle" as const,
     })),
@@ -317,7 +328,7 @@ function Coordinates({
       key: `rank-${label}`,
       text: label,
       x: board.x + board.width + fontSize * 0.7,
-      y: board.y + (index + 0.5) * cell,
+      y: board.y + (index + 0.5) * cellHeight,
       baseline: "central" as const,
     })),
   ];
@@ -400,8 +411,8 @@ function HandCounts({
   layout: BoardLayout;
   colors: BoardColors;
 }) {
-  const radius = layout.cell * 0.16;
-  const fontSize = layout.cell * 0.22;
+  const radius = layout.cellWidth * 0.16;
+  const fontSize = layout.cellWidth * 0.22;
 
   return (
     <g
@@ -423,7 +434,7 @@ function HandCounts({
               r={radius}
               fill={colors.countChipFill}
               stroke={colors.countChipEdge}
-              strokeWidth={Math.max(1, layout.cell * 0.024)}
+              strokeWidth={Math.max(1, layout.cellWidth * 0.024)}
             />
             <text
               x={x}
@@ -593,8 +604,8 @@ export function ShogiBoard({
         >
           <feDropShadow
             dx="0"
-            dy={layout.cell * 0.035}
-            stdDeviation={layout.cell * 0.022}
+            dy={layout.cellWidth * 0.035}
+            stdDeviation={layout.cellWidth * 0.022}
             floodColor={colors.pieceShadow}
             floodOpacity="1"
           />
@@ -623,7 +634,7 @@ export function ShogiBoard({
             key={`last-${square}`}
             rect={rect}
             colors={colors}
-            cell={layout.cell}
+            cell={layout.cellWidth}
           />
         );
       })}
@@ -662,7 +673,8 @@ export function ShogiBoard({
             colors={colors}
             x={item.x}
             y={item.y}
-            size={item.size}
+            width={item.width}
+            height={item.height}
             rotation={item.rotation}
           />
         ))}
