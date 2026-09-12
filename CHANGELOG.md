@@ -5,6 +5,13 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-12
+
+### Changed
+
+- 盤のマスを、実物の将棋盤と同じ縦長にした（一般的な寸法 3.03cm × 3.33cm に合わせて 1 : 1.1）。
+  駒もマスと同じだけ縦長になる。設定は増えていない。
+
 ## [0.1.0] - 2026-08-30
 
 最初のリリース。
@@ -30,5 +37,6 @@
   tooltip に OBS 側の接続数を出す。
 - 配布する exe に入る第三者コンポーネントのライセンスページ（`/licenses`）。
 
-[Unreleased]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/yuniruyuni/StreamShougiBoard/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yuniruyuni/StreamShougiBoard/releases/tag/v0.1.0
