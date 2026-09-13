@@ -3,7 +3,7 @@
   "extends": ["config:recommended"],
   "timezone": "Asia/Tokyo",
   "schedule": ["before 6am on monday"],
-  "prConcurrentLimit": 3,
+  "prConcurrentLimit": 4,
   "packageRules": [
     {
       "matchManagers": ["cargo"],
@@ -17,5 +17,9 @@
       "matchManagers": ["github-actions"],
       "groupName": "github actions"
     }
-  ]
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  }
 }
