@@ -39,7 +39,7 @@ jobs:
           toolchain: 1.98.1
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           workspaces: app
           # CI の windows-check ジョブと同じ鍵。どちらも dev プロファイルを積む。
@@ -92,7 +92,7 @@ jobs:
           toolchain: 1.98.1
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           workspaces: app
           # CI の windows-build ジョブと同じ鍵。main で通ったコミットにタグを打つので、
