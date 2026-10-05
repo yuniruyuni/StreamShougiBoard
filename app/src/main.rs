@@ -6,6 +6,9 @@
 // トレイ常駐なので、Windows では起動時にコンソール窓を出さない。
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
+// Windows 専用の機能だが、パスの引用と照合はこの環境でも試験したいので test では有効にする。
+#[cfg(any(windows, test))]
+mod autostart;
 mod board;
 mod config;
 mod fixtures;

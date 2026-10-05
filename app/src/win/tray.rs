@@ -18,9 +18,9 @@ use windows::Win32::UI::WindowsAndMessaging::{
     AppendMenuW, CreatePopupMenu, CreateWindowExW, DefWindowProcW, DestroyMenu, DestroyWindow,
     DispatchMessageW, GetCursorPos, GetMessageW, KillTimer, LoadIconW, PostQuitMessage,
     RegisterClassW, SetForegroundWindow, SetTimer, TrackPopupMenu, TranslateMessage, HWND_MESSAGE,
-    IDI_APPLICATION, MF_SEPARATOR, MF_STRING, MSG, TPM_NONOTIFY, TPM_RETURNCMD, TPM_RIGHTBUTTON,
-    WINDOW_EX_STYLE, WINDOW_STYLE, WM_APP, WM_CONTEXTMENU, WM_DESTROY, WM_LBUTTONUP, WM_RBUTTONUP,
-    WM_TIMER, WNDCLASSW,
+    IDI_APPLICATION, MF_CHECKED, MF_SEPARATOR, MF_STRING, MSG, TPM_NONOTIFY, TPM_RETURNCMD,
+    TPM_RIGHTBUTTON, WINDOW_EX_STYLE, WINDOW_STYLE, WM_APP, WM_CONTEXTMENU, WM_DESTROY,
+    WM_LBUTTONUP, WM_RBUTTONUP, WM_TIMER, WNDCLASSW,
 };
 
 use crate::net::Hub;
@@ -37,7 +37,8 @@ const TOOLTIP_INTERVAL_MS: u32 = 1_000;
 const MENU_OPEN_CONTROL: usize = 1;
 const MENU_COPY_BOARD_URL: usize = 2;
 const MENU_LICENSES: usize = 3;
-const MENU_EXIT: usize = 4;
+const MENU_AUTOSTART: usize = 4;
+const MENU_EXIT: usize = 5;
 
 /// window proc から触るための、このスレッド限定の文脈。
 struct TrayContext {
@@ -127,6 +128,13 @@ fn show_menu(hwnd: HWND) {
             MENU_COPY_BOARD_URL,
             w!("OBS 用 URL をコピー"),
         );
+        // チェックはレジストリを読んだ結果。書き込みに失敗したら次に開いたとき外れたまま。
+        let autostart = if crate::autostart::enabled() {
+            MF_STRING | MF_CHECKED
+        } else {
+            MF_STRING
+        };
+        let _ = AppendMenuW(menu, autostart, MENU_AUTOSTART, w!("Windows 起動時に開始"));
         let _ = AppendMenuW(menu, MF_STRING, MENU_LICENSES, w!("第三者ライセンス..."));
         let _ = AppendMenuW(menu, MF_SEPARATOR, 0, None);
         let _ = AppendMenuW(menu, MF_STRING, MENU_EXIT, w!("終了"));
@@ -154,6 +162,11 @@ fn show_menu(hwnd: HWND) {
             MENU_OPEN_CONTROL => open_in_browser(&context.urls.control),
             MENU_COPY_BOARD_URL => copy_to_clipboard(&context.urls.board),
             MENU_LICENSES => open_in_browser(&context.urls.licenses),
+            MENU_AUTOSTART => {
+                if let Err(error) = crate::autostart::set(!crate::autostart::enabled()) {
+                    eprintln!("StreamShougiBoard: {error}");
+                }
+            }
             MENU_EXIT => unsafe { PostQuitMessage(0) },
             _ => {}
         }
