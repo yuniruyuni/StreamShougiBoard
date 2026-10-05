@@ -29,6 +29,7 @@ bash scripts/install-cargo-about.sh   # 配布バイナリを取って入れる 
 
 bun run check        # 版の一致 → prepare:assets → 型 → lint → client のテスト
 bun run watch:run    # http://127.0.0.1:16874/ が立つ
+bun run deploy       # 検査 + Windows 向けクロスビルド + 常駐先へ配置
 
 cd app
 cargo fmt --check

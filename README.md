@@ -77,6 +77,23 @@ bun run watch:run    # 開発用。http://127.0.0.1:16874/ が立つ
 release ビルドが exe へ埋め込みます。debug ビルドでは実行時に `client/static` を読むので、
 ページを直しただけならサーバーの再起動は不要です。
 
+### 常駐先への配置
+
+```bash
+bun run deploy
+```
+
+検査 → Windows 向けビルド → 常駐先の exe 置き換えまでを行います。配置先の既定は
+`/mnt/d/tools/StreamShougiBoard`、`STREAM_SHOUGI_DEPLOY_DIR` で変えられます。
+`stream-shougi-board.exe` を配布名の `StreamShougiBoard.exe` として置きます。
+
+- WSL からは `bun run build:windows` が `x86_64-pc-windows-gnu` でクロスビルドします
+  (`mingw-w64` が要ります)。Windows 上では従来どおり `bun run build` の MSVC ビルドを使ってください。
+  配布物は Release workflow の MSVC ビルドのままです。
+- 常駐中 (`127.0.0.1:16874` が応答) のときは何も書かずに中止します。実行中の exe は
+  Windows 側でロックされ、上書きすると壊れた exe が残るためです。
+- 直前の exe は `StreamShougiBoard.exe.previous` として残します。
+
 配布物は Windows の MSVC ターゲットで作ります。
 
 ```bash
