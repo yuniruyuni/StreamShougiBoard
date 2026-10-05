@@ -163,3 +163,8 @@ jobs:
       - name: Build release executable
         working-directory: app
         run: cargo build --release --locked
+
+      # 埋め込みマニフェストが崩れると「サイドバイサイド構成が正しくありません」で
+      # 起動すらできない。ビルド入力ではなく実物の PE を見る。
+      - name: Verify embedded Windows manifest
+        run: bun scripts/check-windows-manifest.ts app/target/release/stream-shougi-board.exe
