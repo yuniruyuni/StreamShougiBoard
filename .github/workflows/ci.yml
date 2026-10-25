@@ -33,13 +33,13 @@ jobs:
           bun-version: 1.4.4
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
-          toolchain: 1.98.1
+          toolchain: 1.99.1
           components: clippy, rustfmt
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: app
 
@@ -86,13 +86,13 @@ jobs:
           bun-version: 1.4.4
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
-          toolchain: 1.98.1
+          toolchain: 1.99.1
           components: clippy
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: app
           # Release の test ジョブと同じ鍵。どちらも dev プロファイルの成果物を積むので、
@@ -138,12 +138,12 @@ jobs:
           bun-version: 1.4.4
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
-          toolchain: 1.98.1
+          toolchain: 1.99.1
 
       - name: Cache Cargo
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: app
           # Release の build ジョブと同じ鍵。どちらも release プロファイルを積むので、
