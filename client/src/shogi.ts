@@ -112,6 +112,8 @@ export type BackgroundColor = "white" | "black";
 export type HandLayout = "sides" | "stacked";
 
 export interface ViewSettings {
+  /** OBS側だけの表示・非表示。操作画面と盤面・履歴は保持する。 */
+  visible: boolean;
   backgroundColor: BackgroundColor;
   /** 地の濃さ (%)。0 なら地を塗らず、盤と駒台の外はそのまま映像が透ける。 */
   backgroundOpacity: number;
@@ -135,6 +137,7 @@ export const MAX_BACKGROUND_OPACITY = 100;
 
 /** サーバー側の既定値 (`app/src/view.rs`) と揃える。テストと初期表示にだけ使う。 */
 export const DEFAULT_VIEW: ViewSettings = {
+  visible: true,
   backgroundColor: "black",
   backgroundOpacity: 0,
   margin: 16,

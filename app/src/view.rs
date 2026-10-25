@@ -30,6 +30,9 @@ pub const MAX_BACKGROUND_OPACITY: i64 = 100;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ViewSettings {
+    /// OBS側だけを隠す。操作画面と盤面・履歴はそのまま保持する。
+    #[serde(default = "visible_by_default")]
+    pub visible: bool,
     pub background_color: BackgroundColor,
     /// 地の濃さ (%)。0 なら地を塗らず、盤と駒台の外はそのまま映像が透ける。
     pub background_opacity: i64,
@@ -52,6 +55,7 @@ pub struct ViewSettings {
 impl Default for ViewSettings {
     fn default() -> Self {
         Self {
+            visible: true,
             background_color: BackgroundColor::Black,
             background_opacity: 0,
             margin: 16,
@@ -63,6 +67,10 @@ impl Default for ViewSettings {
             animate: true,
         }
     }
+}
+
+fn visible_by_default() -> bool {
+    true
 }
 
 fn clamp_int(value: Option<&serde_json::Value>, min: i64, max: i64, fallback: i64) -> i64 {
@@ -93,6 +101,7 @@ impl ViewSettings {
         };
 
         Self {
+            visible: pick_bool(input.get("visible"), self.visible),
             background_color: pick_enum(input.get("backgroundColor"), self.background_color),
             background_opacity: clamp_int(
                 input.get("backgroundOpacity"),

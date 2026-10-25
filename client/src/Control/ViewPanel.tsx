@@ -21,6 +21,11 @@ const LAYOUT_LABELS: { value: HandLayout; label: string }[] = [
   { value: "stacked", label: "上下" },
 ];
 
+const VISIBILITY_LABELS = [
+  { value: true, label: "表示" },
+  { value: false, label: "隠す" },
+];
+
 const TOGGLES: { key: keyof ViewSettings; label: string; hint: string }[] = [
   { key: "showLastMove", label: "直前の手", hint: "動いたマスを光らせる" },
   {
@@ -49,6 +54,30 @@ export function ViewPanel({ view, send }: ViewPanelProps) {
   return (
     <section className="panel">
       <h2 className="panel__title">OBS の見た目</h2>
+
+      <div className="field">
+        <span className="field__label">配信への表示</span>
+        <div className="segmented">
+          {VISIBILITY_LABELS.map((option) => (
+            <button
+              key={String(option.value)}
+              type="button"
+              className={
+                view.visible === option.value
+                  ? "segmented__item is-on"
+                  : "segmented__item"
+              }
+              onClick={() => patch({ visible: option.value })}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <span className="field__note">
+          「隠す」なら OBS のブラウザソースを出したままでも盤は映らない。
+          手元の操作画面には出続ける
+        </span>
+      </div>
 
       <div className="field">
         <span className="field__label">背景の色</span>

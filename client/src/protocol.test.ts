@@ -74,6 +74,7 @@ describe("Rust が書き出した snapshot", () => {
     expect(typeof view.margin).toBe("number");
     expect(view.handLayout).toBe("sides");
     for (const key of [
+      "visible",
       "showLastMove",
       "showSelection",
       "showCoordinates",

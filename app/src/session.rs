@@ -12,6 +12,50 @@ use crate::view::ViewSettings;
 /// 履歴の上限。超えた分は古い側から捨てる。
 pub const MAX_HISTORY: usize = 512;
 
+#[cfg(test)]
+mod visibility_tests {
+    use super::*;
+    use crate::board::square_at;
+
+    #[test]
+    fn 表示の切り替えは盤面と履歴と選択を変えない() {
+        let mut session = Session::new(ViewSettings::default());
+        for (file, rank) in [(7, 7), (7, 6), (3, 3)] {
+            assert_eq!(
+                session.apply(ClientMessage::TapSquare {
+                    square: square_at(file, rank) as i64,
+                }),
+                None
+            );
+        }
+        let board = session.board().clone();
+        let history = session.history.clone();
+        let index = session.history_index();
+        let selection = session.selection().cloned();
+        assert!(selection.is_some());
+        assert!(history.len() > 1);
+
+        for visible in [false, true, false] {
+            assert_eq!(
+                session.apply(ClientMessage::SetView {
+                    view: serde_json::json!({"visible": visible}),
+                }),
+                None
+            );
+            assert_eq!(session.view().visible, visible);
+            assert_eq!(session.board(), &board);
+            assert_eq!(session.history, history);
+            assert_eq!(session.history_index(), index);
+            assert_eq!(session.selection(), selection.as_ref());
+        }
+        session.apply(ClientMessage::SetView {
+            view: serde_json::json!({"visible": "true", "margin": 40}),
+        });
+        assert!(!session.view().visible);
+        assert_eq!(session.view().margin, 40);
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Session {
     /// 長さは必ず 1 以上。末尾が最新の局面。
