@@ -5,6 +5,14 @@
 `protocol-fixtures/snapshot.json` を作り直してください。Rust 側と client 側のテストが
 同じ fixture を見ているので、片方だけ直すと必ずどちらかが落ちます。
 
+## OBSへの表示・非表示
+
+`view.visible` はOBS用の盤面・持ち駒・背景の表示を切り替える真偽値です。
+`{"type":"set_view","view":{"visible":false}}` で全体を隠し、`true` で再表示します。
+操作画面の盤、局面、選択、Undo/Redoの履歴は変えません。
+設定は終了時に保存され、既存の `visible:false` も更新後に維持されます。
+この項目のない従来設定では `true` を既定値にします。
+
 ## Transport
 
 - HTTP origin: `http://127.0.0.1:<port>` (既定 16874)

@@ -7,9 +7,7 @@
 
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { ShogiBoard } from "~/Board/component";
-import { boardSizeToFit } from "~/Board/layout";
-import { backgroundColor } from "~/Board/theme";
+import { BoardStage } from "~/Board/Stage";
 import { useSession } from "~/useSession";
 
 /** これを超えて切断が続いたら、古い盤面を配信から引っ込める。 */
@@ -51,25 +49,8 @@ function BoardPage() {
 
   if (snapshot === null) return null;
 
-  // 地はブラウザソースの領域いっぱいに敷く。盤は領域に合わせて伸縮するので、
-  // SVG の中を塗ると余った上下左右が塗り残しになる。
-  const background = backgroundColor(snapshot.view);
-  const boardSize = boardSizeToFit(snapshot.view, width, height);
-
   return (
-    <div
-      className={gone ? "stage stage--gone" : "stage"}
-      style={background === null ? undefined : { background }}
-    >
-      <ShogiBoard
-        board={snapshot.board}
-        view={snapshot.view}
-        boardSize={boardSize}
-        selection={snapshot.selection}
-        showSelection={snapshot.view.showSelection}
-        paintBackground={false}
-      />
-    </div>
+    <BoardStage snapshot={snapshot} width={width} height={height} gone={gone} />
   );
 }
 

@@ -316,6 +316,7 @@
     }
   },
   "view": {
+    "visible": true,
     "backgroundColor": "black",
     "backgroundOpacity": 0,
     "margin": 16,

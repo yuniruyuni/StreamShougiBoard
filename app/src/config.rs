@@ -114,6 +114,34 @@ pub fn save(config: &AppConfig) {
 }
 
 #[cfg(test)]
+mod visibility_tests {
+    use super::*;
+
+    #[test]
+    fn 非表示設定は保存形式の往復でも失われない() {
+        let original = parse_config(
+            r#"{"port":16874,"autoOpenControl":false,"view":{"visible":false,"margin":32,"backgroundOpacity":90}}"#,
+        );
+        assert!(!original.view.visible);
+        assert_eq!(original.view.margin, 32);
+        let stored = serde_json::to_string(&original).expect("serialize config");
+        assert_eq!(parse_config(&stored), original);
+    }
+
+    #[test]
+    fn 表示指定のない従来設定は表示を既定値にする() {
+        assert!(parse_config(r#"{"view":{"margin":32}}"#).view.visible);
+        let mut raw = serde_json::to_value(ViewSettings::default()).expect("serialize view");
+        raw.as_object_mut().expect("object").remove("visible");
+        assert!(
+            serde_json::from_value::<ViewSettings>(raw)
+                .expect("legacy view")
+                .visible
+        );
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::view::{BackgroundColor, HandLayout};
