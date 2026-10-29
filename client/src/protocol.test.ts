@@ -13,7 +13,12 @@ import {
  * Rust 側 (`app/src/fixtures.rs`) が書き出した snapshot を、この型のまま読めるか確かめる。
  * 片側だけプロトコルを変えると、Rust 側かここのどちらかが必ず落ちる。
  */
-const snapshot = fixture as Snapshot;
+const snapshot = fixture as unknown as Snapshot;
+
+if (snapshot.game.mode !== "shogi") {
+  throw new Error("snapshot.json は将棋の局面のはず");
+}
+const game = snapshot.game;
 
 describe("Rust が書き出した snapshot", () => {
   test("client の型として受け取れる", () => {
@@ -21,14 +26,14 @@ describe("Rust が書き出した snapshot", () => {
     // 版そのものはリリースのたびに変わるので、形だけを見る。
     expect(typeof snapshot.appVersion).toBe("string");
     expect(typeof snapshot.rev).toBe("number");
-    expect(typeof snapshot.sfen).toBe("string");
+    expect(typeof game.sfen).toBe("string");
   });
 
   test("盤は 81 マスで、駒は表示に必要な形で入っている", () => {
-    expect(snapshot.board.squares).toHaveLength(SQUARE_COUNT);
+    expect(game.board.squares).toHaveLength(SQUARE_COUNT);
 
     // 2二 は成った角 (馬)。表示側はこの 3 つだけを見て駒を描く。
-    const uma = pieceAt(snapshot.board, squareAt(2, 2));
+    const uma = pieceAt(game.board, squareAt(2, 2));
     expect(uma).not.toBeNull();
     if (uma === null) return;
     expect(uma.kind).toBe("B");
@@ -40,21 +45,21 @@ describe("Rust が書き出した snapshot", () => {
 
   test("持ち駒は 7 種すべてが揃っている", () => {
     for (const side of ["b", "w"] as const) {
-      const hand = snapshot.board.hands[side];
+      const hand = game.board.hands[side];
       for (const kind of HAND_ORDER) {
         expect(Array.isArray(hand[kind])).toBe(true);
       }
     }
     // 取った角が先手の駒台に 1 枚。
-    expect(snapshot.board.hands.b.B).toHaveLength(1);
+    expect(game.board.hands.b.B).toHaveLength(1);
   });
 
   test("直前の手と選択を描くための情報が入っている", () => {
-    expect(snapshot.board.lastMove).toEqual({
+    expect(game.board.lastMove).toEqual({
       from: squareAt(8, 8),
       to: squareAt(2, 2),
     });
-    expect(snapshot.selection).toEqual({
+    expect(game.selection).toEqual({
       kind: "hand",
       side: "b",
       pieceKind: "B",
@@ -62,8 +67,8 @@ describe("Rust が書き出した snapshot", () => {
   });
 
   test("手番・手数・履歴を読める", () => {
-    expect(snapshot.board.turn).toBe("w");
-    expect(typeof snapshot.board.moveNumber).toBe("number");
+    expect(game.board.turn).toBe("w");
+    expect(typeof game.board.moveNumber).toBe("number");
     expect(snapshot.history.index).toBeLessThan(snapshot.history.length);
   });
 

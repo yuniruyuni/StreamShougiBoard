@@ -164,7 +164,7 @@ async fn handle(State(state): State<Arc<AppState>>, request: Request<Body>) -> R
         }
         return match WebSocketUpgrade::from_request(request).await {
             Ok(upgrade) => upgrade
-                // 大きすぎるフレームは読む前に切る。受け付けるのは ping と短いコマンドだけ。
+                // 大きすぎるフレームは読む前に切る。受け付けるのは ping とコマンド (最大は SGF の棋譜) だけ。
                 .max_message_size(MAX_CLIENT_FRAME_BYTES)
                 .max_frame_size(MAX_CLIENT_FRAME_BYTES)
                 .on_upgrade(move |socket| subscribe(socket, state.hub.clone())),

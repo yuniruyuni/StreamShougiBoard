@@ -1,5 +1,7 @@
 import type { Snapshot } from "~/protocol";
 import { ShogiBoard } from "./component";
+import { GoBoardView } from "./GoBoard";
+import { computeGoLayout } from "./goLayout";
 import { boardSizeToFit } from "./layout";
 import { backgroundColor } from "./theme";
 
@@ -10,26 +12,37 @@ interface BoardStageProps {
   gone: boolean;
 }
 
-/** OBS用の表示境界。操作画面のShogiBoardは非表示設定の影響を受けない。 */
+/** OBS用の表示境界。操作画面の盤は非表示設定の影響を受けない。 */
 export function BoardStage({ snapshot, width, height, gone }: BoardStageProps) {
-  if (!snapshot.view.visible) return null;
+  const { view, game } = snapshot;
+  if (!view.visible) return null;
 
   // 背景も含めてOBSの領域全体を表示・非表示にする。
-  const background = backgroundColor(snapshot.view);
-  const boardSize = boardSizeToFit(snapshot.view, width, height);
+  const background = backgroundColor(view);
   return (
     <div
       className={gone ? "stage stage--gone" : "stage"}
       style={background === null ? undefined : { background }}
     >
-      <ShogiBoard
-        board={snapshot.board}
-        view={snapshot.view}
-        boardSize={boardSize}
-        selection={snapshot.selection}
-        showSelection={snapshot.view.showSelection}
-        paintBackground={false}
-      />
+      {game.mode === "shogi" ? (
+        <ShogiBoard
+          board={game.board}
+          view={view}
+          boardSize={boardSizeToFit(view, width, height)}
+          selection={game.selection}
+          showSelection={view.showSelection}
+          paintBackground={false}
+        />
+      ) : (
+        <GoBoardView
+          board={game.board}
+          view={view}
+          boardSize={boardSizeToFit(view, width, height, (v, size) =>
+            computeGoLayout(v, size, game.board.size),
+          )}
+          paintBackground={false}
+        />
+      )}
     </div>
   );
 }

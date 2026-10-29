@@ -12,12 +12,14 @@ mod autostart;
 mod board;
 mod config;
 mod fixtures;
+mod go;
 mod net;
 mod piece;
 mod platform;
 mod protocol;
 mod session;
 mod sfen;
+mod sgf;
 mod view;
 
 #[cfg(windows)]
@@ -44,7 +46,7 @@ fn main() -> Result<()> {
     // 実際のポートを先に知る必要があるので、bind だけ同期で済ませる。
     let (listener, started) = net::server::bind(config.port)?;
     let port = started.port;
-    let hub = Arc::new(Hub::new(config.view));
+    let hub = Arc::new(Hub::new(config.view, config.mode));
 
     let urls = Urls {
         control: format!("http://{}:{port}", net::server::LOOPBACK_HOST),
@@ -94,10 +96,12 @@ fn main() -> Result<()> {
         Err(_) => anyhow::bail!("サーバースレッドが異常終了しました"),
     }
 
-    // 見た目の設定は配信をまたいで残す。終了時に一度だけ書き戻す。
+    // 見た目の設定とモードは配信をまたいで残す。終了時に一度だけ書き戻す。
     let view = hub.view();
-    if view != config.view {
+    let mode = hub.mode();
+    if view != config.view || mode != config.mode {
         config.view = view;
+        config.mode = mode;
         config::save(&config);
     }
 

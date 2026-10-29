@@ -37,3 +37,19 @@ body {
 .board--animated .pieces > g {
   transition: transform 180ms ease-out;
 }
+
+/*
+ * 碁石は動かないので、置いた瞬間だけ少し縮んだところから広げる。
+ * 透明度は動かさない。途中で止まっても、半透明の石が配信に残るよりは小さい石の方がましなため。
+ */
+.board--animated .stones > .stone {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: stone-in 140ms ease-out;
+}
+
+@keyframes stone-in {
+  from {
+    transform: scale(0.82);
+  }
+}

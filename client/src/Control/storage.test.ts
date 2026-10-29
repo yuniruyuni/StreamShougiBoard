@@ -15,7 +15,7 @@ describe("parseSaved", () => {
 
   test("形の合わない要素だけを捨てる", () => {
     const raw = JSON.stringify([
-      { id: "a", name: "序盤", sfen: "9/9/9/9/9/9/9/9/9 b - 1", savedAt: 1 },
+      { id: "a", name: "序盤", text: "9/9/9/9/9/9/9/9/9 b - 1", savedAt: 1 },
       { id: "b", name: "壊れ" },
       null,
     ]);
@@ -23,15 +23,24 @@ describe("parseSaved", () => {
     expect(parsed).toHaveLength(1);
     expect(parsed[0]?.name).toBe("序盤");
   });
+
+  test("囲碁に対応する前の sfen で保存した局面も読める", () => {
+    const raw = JSON.stringify([
+      { id: "a", name: "旧", sfen: "9/9/9/9/9/9/9/9/9 b - 1", savedAt: 1 },
+    ]);
+    expect(parseSaved(raw)).toEqual([
+      { id: "a", name: "旧", text: "9/9/9/9/9/9/9/9/9 b - 1", savedAt: 1 },
+    ]);
+  });
 });
 
 describe("addSaved / removeSaved", () => {
   test("新しいものを先頭へ積み、上限で古いものを落とす", () => {
-    let entries = addSaved([], { name: "1", sfen: "s1", savedAt: 1 });
+    let entries = addSaved([], { name: "1", text: "s1", savedAt: 1 });
     for (let i = 2; i <= MAX_SAVED + 5; i += 1) {
       entries = addSaved(entries, {
         name: String(i),
-        sfen: `s${i}`,
+        text: `s${i}`,
         savedAt: i,
       });
     }
@@ -41,7 +50,7 @@ describe("addSaved / removeSaved", () => {
   });
 
   test("id を指定して削除する", () => {
-    const entries = addSaved([], { name: "a", sfen: "s", savedAt: 1 });
+    const entries = addSaved([], { name: "a", text: "s", savedAt: 1 });
     const id = entries[0]?.id ?? "";
     expect(removeSaved(entries, id)).toEqual([]);
     expect(removeSaved(entries, "other")).toHaveLength(1);

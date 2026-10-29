@@ -1,18 +1,20 @@
 /**
  * 操作ページ。盤のクリックをコマンドとしてサーバーへ送り、返ってきた snapshot を描く。
  *
- * 盤そのものは盤面ページと同じ ShogiBoard を同じ view で描くので、
+ * 盤そのものは盤面ページと同じ ShogiBoard / GoBoardView を同じ view で描くので、
  * ここに見えているものが、そのまま OBS に出ているものになる。
  * 違うのは大きさだけで、OBS 側はブラウザソースの領域に合わせて伸縮する。
  */
 
 import { useCallback, useEffect, useRef } from "react";
 import { type BoardHandlers, ShogiBoard } from "~/Board/component";
+import { type GoBoardHandlers, GoBoardView } from "~/Board/GoBoard";
 import type { ConnectionStatus } from "~/connection";
-import type { Command, Snapshot } from "~/protocol";
+import { GO_SIZES } from "~/go";
+import type { Command, GameMode, Snapshot } from "~/protocol";
 import type { Side } from "~/shogi";
 import { useSession } from "~/useSession";
-import { SfenPanel } from "./SfenPanel";
+import { PositionPanel } from "./PositionPanel";
 import { ViewPanel } from "./ViewPanel";
 
 /**
@@ -27,13 +29,33 @@ const DOUBLE_CLICK_WINDOW_MS = 180;
  */
 const PREVIEW_BOARD_SIZE = 560;
 
-const PRESETS: { name: string; label: string }[] = [
-  { name: "hirate", label: "盤面初期化" },
-  { name: "allPieces", label: "全駒" },
-  { name: "empty", label: "空の盤" },
+const MODES: { mode: GameMode; label: string }[] = [
+  { mode: "shogi", label: "将棋" },
+  { mode: "go", label: "囲碁" },
 ];
 
-const SIDE_LABEL: Record<Side, string> = { b: "先手", w: "後手" };
+const PRESETS: Record<GameMode, { command: Command; label: string }[]> = {
+  shogi: [
+    { command: { type: "preset", name: "hirate" }, label: "盤面初期化" },
+    { command: { type: "preset", name: "allPieces" }, label: "全駒" },
+    { command: { type: "preset", name: "empty" }, label: "空の盤" },
+  ],
+  go: GO_SIZES.map((size) => ({
+    command: { type: "go_new", size },
+    label: `${size}路で初期化`,
+  })),
+};
+
+const SIDE_LABEL: Record<GameMode, Record<Side, string>> = {
+  shogi: { b: "先手", w: "後手" },
+  go: { b: "黒番", w: "白番" },
+};
+
+const HINTS: Record<GameMode, string> = {
+  shogi:
+    "クリックで選択・移動、駒台へ送るときは駒を選んでから駒台をクリック。ダブルクリックで成／不成、右クリックで先後を反転。 ←→ で履歴、Esc で選択解除。",
+  go: "クリックで手番の石を置き、囲んだ石は自動で取ります。Shift+クリックで黒だけ、Ctrl (Mac は ⌘)+クリックで白だけを手番を変えずに並べ、Alt+クリックか右クリックで石を消します。 ←→ で履歴。",
+};
 
 function StatusBadge({ status }: { status: ConnectionStatus }) {
   return (
@@ -71,7 +93,8 @@ function BoardPanel({
   snapshot: Snapshot;
   send(command: Command): void;
 }) {
-  const { history, board } = snapshot;
+  const { history, game } = snapshot;
+  const { mode, board } = game;
   const canBack = history.index > 0;
   const canForward = history.index < history.length - 1;
 
@@ -79,13 +102,33 @@ function BoardPanel({
     <section className="panel">
       <h2 className="panel__title">盤面</h2>
 
+      <div className="field">
+        <span className="field__label">ゲーム</span>
+        <div className="segmented">
+          {MODES.map((option) => (
+            <button
+              key={option.mode}
+              type="button"
+              className={
+                mode === option.mode
+                  ? "segmented__item is-on"
+                  : "segmented__item"
+              }
+              onClick={() => send({ type: "set_mode", mode: option.mode })}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="row row--wrap">
-        {PRESETS.map((preset) => (
+        {PRESETS[mode].map((preset) => (
           <button
-            key={preset.name}
+            key={preset.label}
             type="button"
             className="button"
-            onClick={() => send({ type: "preset", name: preset.name })}
+            onClick={() => send(preset.command)}
           >
             {preset.label}
           </button>
@@ -106,7 +149,7 @@ function BoardPanel({
               }
               onClick={() => send({ type: "set_turn", side })}
             >
-              {SIDE_LABEL[side]}
+              {SIDE_LABEL[mode][side]}
             </button>
           ))}
         </div>
@@ -173,7 +216,8 @@ export function ControlPage() {
 
   useEffect(() => cancelPendingClick, [cancelPendingClick]);
 
-  const hasSelection = snapshot?.selection != null;
+  const hasSelection =
+    snapshot?.game.mode === "shogi" && snapshot.game.selection !== null;
 
   const handlers: BoardHandlers = {
     onSquare: (square) => {
@@ -203,12 +247,32 @@ export function ControlPage() {
     },
   };
 
+  const goHandlers: GoBoardHandlers = {
+    onPoint: (point, tool) => {
+      switch (tool) {
+        case "turn":
+          send({ type: "go_place", point });
+          return;
+        case "black":
+          send({ type: "go_place", point, color: "b" });
+          return;
+        case "white":
+          send({ type: "go_place", point, color: "w" });
+          return;
+        case "erase":
+          send({ type: "go_remove", point });
+          return;
+      }
+    },
+  };
+
   useEffect(() => {
     if (snapshot === null) return;
     const onKey = (event: KeyboardEvent) => {
       const target = event.target;
       if (
         target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
         target instanceof HTMLSelectElement
       )
         return;
@@ -235,6 +299,9 @@ export function ControlPage() {
     );
   }
 
+  const { game } = snapshot;
+  const text = game.mode === "shogi" ? game.sfen : game.sgf;
+
   return (
     <div className="app">
       <header className="header">
@@ -246,29 +313,40 @@ export function ControlPage() {
       <main className="layout">
         <section className="preview">
           <div className="preview__canvas">
-            <ShogiBoard
-              board={snapshot.board}
-              view={snapshot.view}
-              boardSize={PREVIEW_BOARD_SIZE}
-              selection={snapshot.selection}
-              showSelection
-              handlers={handlers}
-            />
+            {game.mode === "shogi" ? (
+              <ShogiBoard
+                board={game.board}
+                view={snapshot.view}
+                boardSize={PREVIEW_BOARD_SIZE}
+                selection={game.selection}
+                showSelection
+                handlers={handlers}
+              />
+            ) : (
+              <GoBoardView
+                board={game.board}
+                view={snapshot.view}
+                boardSize={PREVIEW_BOARD_SIZE}
+                handlers={goHandlers}
+              />
+            )}
           </div>
-          <p className="hint">
-            クリックで選択・移動、駒台へ送るときは駒を選んでから駒台をクリック。
-            ダブルクリックで成／不成、右クリックで先後を反転。 ←→ で履歴、Esc
-            で選択解除。
-          </p>
+          <p className="hint">{HINTS[game.mode]}</p>
           <p className={rejected === null ? "reject reject--hidden" : "reject"}>
-            {rejected ?? " "}
+            {rejected ?? " "}
           </p>
         </section>
 
         <aside className="panels">
           <BoardPanel snapshot={snapshot} send={send} />
-          <ViewPanel view={snapshot.view} send={send} />
-          <SfenPanel sfen={snapshot.sfen} send={send} />
+          <ViewPanel view={snapshot.view} mode={game.mode} send={send} />
+          {/* モードごとに保存先も入力中の文字も別なので、切り替えたら作り直す。 */}
+          <PositionPanel
+            key={game.mode}
+            mode={game.mode}
+            text={text}
+            send={send}
+          />
         </aside>
       </main>
 

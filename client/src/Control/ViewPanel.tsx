@@ -1,6 +1,6 @@
 /** OBS 側の見た目を変える操作。変更は set_view としてサーバーへ送り、盤面ページへ即座に届く。 */
 
-import type { Command } from "~/protocol";
+import type { Command, GameMode } from "~/protocol";
 import {
   type BackgroundColor,
   type HandLayout,
@@ -26,28 +26,57 @@ const VISIBILITY_LABELS = [
   { value: false, label: "隠す" },
 ];
 
-const TOGGLES: { key: keyof ViewSettings; label: string; hint: string }[] = [
-  { key: "showLastMove", label: "直前の手", hint: "動いたマスを光らせる" },
-  {
-    key: "showSelection",
-    label: "選択枠もOBSへ",
-    hint: "手元の選択枠を配信にも出す",
-  },
-  {
-    key: "showCoordinates",
-    label: "筋・段の番号",
-    hint: "9〜1 と 一〜九 を表示する",
-  },
-  { key: "flipped", label: "盤を反転", hint: "後手視点にする" },
-  { key: "animate", label: "駒を滑らせる", hint: "移動を補間して描く" },
-];
+interface Toggle {
+  key: keyof ViewSettings;
+  label: string;
+  hint: string;
+}
+
+/** 同じ設定でも、碁盤では指すものが違うので言い方を変える。囲碁には選択枠が無い。 */
+const TOGGLES: Record<GameMode, Toggle[]> = {
+  shogi: [
+    { key: "showLastMove", label: "直前の手", hint: "動いたマスを光らせる" },
+    {
+      key: "showSelection",
+      label: "選択枠もOBSへ",
+      hint: "手元の選択枠を配信にも出す",
+    },
+    {
+      key: "showCoordinates",
+      label: "筋・段の番号",
+      hint: "9〜1 と 一〜九 を表示する",
+    },
+    { key: "flipped", label: "盤を反転", hint: "後手視点にする" },
+    { key: "animate", label: "駒を滑らせる", hint: "移動を補間して描く" },
+  ],
+  go: [
+    {
+      key: "showLastMove",
+      label: "直前の手",
+      hint: "最後に置いた石に印を付ける",
+    },
+    {
+      key: "showCoordinates",
+      label: "座標",
+      hint: "A〜T と 1〜19 を表示する",
+    },
+    { key: "flipped", label: "盤を反転", hint: "白番視点にする" },
+    { key: "animate", label: "石を置く動き", hint: "置いた石を広げて描く" },
+  ],
+};
+
+const HAND_LABEL: Record<GameMode, string> = {
+  shogi: "駒台",
+  go: "アゲハマ",
+};
 
 export interface ViewPanelProps {
   view: ViewSettings;
+  mode: GameMode;
   send(command: Command): void;
 }
 
-export function ViewPanel({ view, send }: ViewPanelProps) {
+export function ViewPanel({ view, mode, send }: ViewPanelProps) {
   const patch = (partial: Partial<ViewSettings>) =>
     send({ type: "set_view", view: partial });
 
@@ -118,7 +147,7 @@ export function ViewPanel({ view, send }: ViewPanelProps) {
       </label>
 
       <div className="field">
-        <span className="field__label">駒台</span>
+        <span className="field__label">{HAND_LABEL[mode]}</span>
         <div className="segmented">
           {LAYOUT_LABELS.map((option) => (
             <button
@@ -158,7 +187,7 @@ export function ViewPanel({ view, send }: ViewPanelProps) {
       </label>
 
       <ul className="toggles">
-        {TOGGLES.map((toggle) => (
+        {TOGGLES[mode].map((toggle) => (
           <li key={toggle.key}>
             <label className="toggle" title={toggle.hint}>
               <input

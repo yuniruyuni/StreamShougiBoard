@@ -1,10 +1,12 @@
 //! 設定の読み書き。OBS の見た目は配信をまたいで保つ必要があるので、
-//! 終了時に同じ場所へ書き戻す。盤面そのものは保存しない (毎回まっさらから始める)。
+//! 終了時に同じ場所へ書き戻す。将棋と囲碁のどちらで終えたかも残し、次は同じモードで始める。
+//! 盤面そのものは保存しない (毎回まっさらから始める)。
 
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use crate::protocol::GameMode;
 use crate::view::ViewSettings;
 
 pub const DEFAULT_PORT: u16 = 16874;
@@ -15,6 +17,9 @@ pub struct AppConfig {
     pub port: u16,
     /// 起動時に操作画面を既定のブラウザで開く。
     pub auto_open_control: bool,
+    /// 直前に使っていたモード。この項目の無い従来設定では将棋。
+    #[serde(default)]
+    pub mode: GameMode,
     pub view: ViewSettings,
 }
 
@@ -23,6 +28,7 @@ impl Default for AppConfig {
         Self {
             port: DEFAULT_PORT,
             auto_open_control: true,
+            mode: GameMode::default(),
             view: ViewSettings::default(),
         }
     }
@@ -81,6 +87,10 @@ pub fn parse_config(raw: &str) -> AppConfig {
             .get("autoOpenControl")
             .and_then(serde_json::Value::as_bool)
             .unwrap_or(defaults.auto_open_control),
+        mode: record
+            .get("mode")
+            .and_then(|raw| serde_json::from_value(raw.clone()).ok())
+            .unwrap_or(defaults.mode),
         view: defaults
             .view
             .merged(record.get("view").unwrap_or(&serde_json::Value::Null)),
@@ -166,6 +176,19 @@ mod tests {
         assert_eq!(config.view.background_opacity, 40);
         assert_eq!(config.view.hand_layout, HandLayout::Stacked);
         assert!(config.view.flipped);
+    }
+
+    #[test]
+    fn モードを読み戻し知らない値は将棋へ落とす() {
+        assert_eq!(parse_config(r#"{"mode":"go"}"#).mode, GameMode::Go);
+        assert_eq!(parse_config(r#"{"mode":"chess"}"#).mode, GameMode::Shogi);
+        assert_eq!(parse_config(r#"{"port":20000}"#).mode, GameMode::Shogi);
+        let stored = serde_json::to_string(&AppConfig {
+            mode: GameMode::Go,
+            ..AppConfig::default()
+        })
+        .expect("serialize config");
+        assert_eq!(parse_config(&stored).mode, GameMode::Go);
     }
 
     #[test]

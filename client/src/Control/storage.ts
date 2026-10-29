@@ -1,27 +1,41 @@
 /**
  * 局面の保存。操作ページのローカルにだけ残る localStorage を使う。
  * サーバーへは送らないので、配信中の局面が勝手に増えることはない。
+ *
+ * 将棋 (SFEN) と囲碁 (SGF) は互いに読めないので、別々の鍵へ分けて置く。
  */
 
-const STORAGE_KEY = "stream-shougi-board.saved-positions.v1";
+import type { GameMode } from "~/protocol";
+
+const STORAGE_KEYS: Record<GameMode, string> = {
+  // 囲碁に対応する前からある鍵。中身はそのまま読めるよう、名前を変えない。
+  shogi: "stream-shougi-board.saved-positions.v1",
+  go: "stream-shougi-board.saved-go-positions.v1",
+};
 export const MAX_SAVED = 30;
 
 export interface SavedPosition {
   id: string;
   name: string;
-  sfen: string;
+  /** 局面の文字表記。将棋なら SFEN、囲碁なら SGF。 */
+  text: string;
   savedAt: number;
 }
 
-function isSavedPosition(value: unknown): value is SavedPosition {
-  if (typeof value !== "object" || value === null) return false;
+/** 囲碁に対応する前の保存は、局面を `sfen` に入れていた。 */
+function toSavedPosition(value: unknown): SavedPosition | null {
+  if (typeof value !== "object" || value === null) return null;
   const record = value as Record<string, unknown>;
-  return (
-    typeof record.id === "string" &&
-    typeof record.name === "string" &&
-    typeof record.sfen === "string" &&
-    typeof record.savedAt === "number"
-  );
+  const text = record.text ?? record.sfen;
+  if (
+    typeof record.id !== "string" ||
+    typeof record.name !== "string" ||
+    typeof text !== "string" ||
+    typeof record.savedAt !== "number"
+  ) {
+    return null;
+  }
+  return { id: record.id, name: record.name, text, savedAt: record.savedAt };
 }
 
 /** 壊れた保存内容で操作ページごと落ちないよう、読めない要素は黙って捨てる。 */
@@ -30,7 +44,10 @@ export function parseSaved(raw: string | null): SavedPosition[] {
   try {
     const value: unknown = JSON.parse(raw);
     if (!Array.isArray(value)) return [];
-    return value.filter(isSavedPosition).slice(0, MAX_SAVED);
+    return value
+      .map(toSavedPosition)
+      .filter((entry): entry is SavedPosition => entry !== null)
+      .slice(0, MAX_SAVED);
   } catch {
     return [];
   }
@@ -51,18 +68,18 @@ export function removeSaved(
   return current.filter((entry) => entry.id !== id);
 }
 
-export function loadSaved(): SavedPosition[] {
+export function loadSaved(mode: GameMode): SavedPosition[] {
   try {
-    return parseSaved(window.localStorage.getItem(STORAGE_KEY));
+    return parseSaved(window.localStorage.getItem(STORAGE_KEYS[mode]));
   } catch {
     // プライベートウィンドウなどで localStorage 自体が使えない場合。
     return [];
   }
 }
 
-export function storeSaved(entries: SavedPosition[]): void {
+export function storeSaved(mode: GameMode, entries: SavedPosition[]): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    window.localStorage.setItem(STORAGE_KEYS[mode], JSON.stringify(entries));
   } catch {
     // 保存できなくても操作は続けられるので握りつぶす。
   }

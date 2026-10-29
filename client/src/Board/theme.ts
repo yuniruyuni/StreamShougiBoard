@@ -43,6 +43,15 @@ export interface BoardColors {
   countChipFill: string;
   countChipEdge: string;
   countText: string;
+  /** 碁石の面。光の当たる側から影の側へ。 */
+  blackStoneRamp: Ramp2;
+  whiteStoneRamp: Ramp2;
+  /** 白石は地の木目に溶けないよう、薄い輪郭を引く。 */
+  whiteStoneEdge: string;
+  /** 碁石が盤に落とす影。駒より丸く低いので少し濃い。 */
+  stoneShadow: string;
+  /** 直前の手の石に重ねる印。黒石・白石のどちらに載っても見える色。 */
+  lastStoneMark: string;
 }
 
 export const BOARD_COLORS: BoardColors = {
@@ -67,6 +76,11 @@ export const BOARD_COLORS: BoardColors = {
   countChipFill: "#c0392b",
   countChipEdge: "#ffffff",
   countText: "#ffffff",
+  blackStoneRamp: ["#5c5c5c", "#0b0b0b"],
+  whiteStoneRamp: ["#ffffff", "#d3d0c6"],
+  whiteStoneEdge: "rgba(90, 80, 60, 0.45)",
+  stoneShadow: "rgba(40, 22, 4, 0.40)",
+  lastStoneMark: "#d23a24",
 };
 
 const BACKGROUND_RGB: Record<BackgroundColor, string> = {

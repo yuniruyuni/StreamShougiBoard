@@ -141,6 +141,22 @@ body {
   transition: transform 180ms ease-out;
 }
 
+/*
+ * 碁石は動かないので、置いた瞬間だけ少し縮んだところから広げる。
+ * 透明度は動かさない。途中で止まっても、半透明の石が配信に残るよりは小さい石の方がましなため。
+ */
+.board--animated .stones > .stone {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: stone-in 140ms ease-out;
+}
+
+@keyframes stone-in {
+  from {
+    transform: scale(0.82);
+  }
+}
+
 .hint {
   margin: 12px 4px 0;
   color: var(--muted);
@@ -249,6 +265,23 @@ body {
   min-width: 0;
 }
 
+.input--multiline {
+  resize: vertical;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ファイル選択の既定の見た目は消し、包んでいる label をボタンとして見せる。 */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .segmented {
   display: flex;
   gap: 6px;
@@ -292,6 +325,8 @@ input[type="range"] {
 
 .sfen {
   margin: 0 0 10px;
+  max-height: 120px;
+  overflow-y: auto;
   padding: 8px;
   border-radius: 8px;
   background: #14161a;

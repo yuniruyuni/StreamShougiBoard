@@ -14,6 +14,11 @@ enforce turns. Adding move validation would break the main use (setting up arbit
 stream). The only rules enforced are the ones that make an edit meaningless: the king cannot be
 captured or sent to a hand, and a piece cannot move onto a friendly piece.
 
+Go mode follows the same principle — no ko, no suicide check — with one deliberate exception:
+placing a stone removes opponent groups left without liberties and counts them as captures
+(`app/src/go.rs`). Removing captured stones by hand is pointless busywork, and a forgotten
+capture would put a wrong position on stream.
+
 Every dependency that ends up in the distributed executable must be permissively licensed. The
 project moved off a JavaScript runtime specifically because it statically linked LGPL-2.1 code, and
 a single-file executable cannot honour that licence's relinking provision comfortably. Do not
@@ -22,11 +27,17 @@ build if you try.
 
 ## Source layout
 
-- `app/`: the Rust binary — board model, SFEN, the command reducer, the loopback server, config,
-  and the Windows tray. Almost all of the application's behaviour lives here, and so do most tests.
-- `client/`: two pages — `/` (control) and `/board` (OBS browser source) — sharing one SVG renderer.
-- `protocol-fixtures/`: a snapshot written by Rust and read by a client test, so the two sides
-  cannot drift apart silently.
+- `app/`: the Rust binary — board models (shogi in `board.rs`, Go in `go.rs`), SFEN and SGF, the
+  command reducer, the loopback server, config, and the Windows tray. Almost all of the
+  application's behaviour lives here, and so do most tests.
+- `client/`: two pages — `/` (control) and `/board` (OBS browser source) — sharing the SVG
+  renderers (`Board/component.tsx` for shogi, `Board/GoBoard.tsx` for Go).
+- `protocol-fixtures/`: snapshots (one per game mode) written by Rust and read by client tests, so
+  the two sides cannot drift apart silently.
+
+`Session` keeps a separate history for shogi and for Go; the mode only selects which one the
+snapshot carries, so switching modes mid-stream loses nothing. Commands that belong to the other
+mode are rejected.
 
 `app/src/session.rs` decides what a click means (select / move / drop). It is deliberately on the
 server side of the wire so that two control pages cannot disagree, and so the interaction can be
@@ -36,8 +47,8 @@ State flows one way: the control page sends commands, the server applies them to
 state, and every subscriber receives a full snapshot. There are no incremental events — the whole
 state is a couple of KB, so full snapshots remove a whole class of resync bugs.
 
-The client holds no board logic. `client/src/shogi.ts` has the display-side types and a handful of
-pure helpers; `client/src/protocol.ts` mirrors `app/src/protocol.rs`.
+The client holds no board logic. `client/src/shogi.ts` and `client/src/go.ts` have the display-side
+types and a handful of pure helpers; `client/src/protocol.ts` mirrors `app/src/protocol.rs`.
 
 ## Commands
 
@@ -70,9 +81,9 @@ regenerate it only when the icon should change.
 
 ## Tests
 
-- `app`: SFEN round-trips, every board edit, click semantics, Host/Origin checks, hub broadcast,
-  config parsing, tray tooltip and clipboard encoding.
-- `client`: layout geometry, saved-position storage, and the protocol fixture.
+- `app`: SFEN and SGF round-trips, every board edit, Go captures, click semantics, mode switching,
+  Host/Origin checks, hub broadcast, config parsing, tray tooltip and clipboard encoding.
+- `client`: layout geometry (shogi and Go), saved-position storage, and the protocol fixtures.
 
 When changing the protocol, update `app/src/protocol.rs`, `client/src/protocol.ts`, and
 `docs/protocol.md` together, then regenerate the fixture with `UPDATE_PROTOCOL_FIXTURES=1 cargo test`.

@@ -17,6 +17,11 @@ import { BOARD_COLORS, backgroundColor } from "./theme";
 
 const snapshot = fixture as unknown as Snapshot;
 
+if (snapshot.game.mode !== "shogi") {
+  throw new Error("snapshot.json は将棋の局面のはず");
+}
+const game = snapshot.game;
+
 const BOARD_SIZE = 540;
 
 function render(
@@ -26,10 +31,10 @@ function render(
   const view = { ...DEFAULT_VIEW, ...patch };
   return renderToStaticMarkup(
     <ShogiBoard
-      board={snapshot.board}
+      board={game.board}
       view={view}
       boardSize={BOARD_SIZE}
-      selection={snapshot.selection}
+      selection={game.selection}
       showSelection={props.showSelection ?? false}
       paintBackground={props.paintBackground}
     />,
@@ -46,11 +51,9 @@ describe("ShogiBoard", () => {
     const svg = render();
 
     // fixture は ▲7六歩 △3四歩 ▲2二角成 まで進み、先手の駒台に角が 1 枚ある局面。
-    const onBoard = snapshot.board.squares.filter(
-      (piece) => piece !== null,
-    ).length;
+    const onBoard = game.board.squares.filter((piece) => piece !== null).length;
     const handKinds = (["b", "w"] as const).flatMap((side) =>
-      Object.values(snapshot.board.hands[side]).filter(
+      Object.values(game.board.hands[side]).filter(
         (pieces) => pieces.length > 0,
       ),
     ).length;
@@ -97,7 +100,7 @@ describe("ShogiBoard", () => {
     // fixture の持ち駒は角 1 枚だけなので、チップは出ない。
     expect(withOne).not.toContain(BOARD_COLORS.countChipFill);
 
-    const stocked = structuredClone(snapshot.board);
+    const stocked = structuredClone(game.board);
     stocked.hands.b.P = [
       { id: "x1", kind: "P", promoted: false, side: "b" },
       { id: "x2", kind: "P", promoted: false, side: "b" },
@@ -138,7 +141,7 @@ describe("ShogiBoard", () => {
     const size = boardSizeToFit(view, 1280, 720);
     const svg = renderToStaticMarkup(
       <ShogiBoard
-        board={snapshot.board}
+        board={game.board}
         view={view}
         boardSize={size}
         selection={null}

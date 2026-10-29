@@ -8,7 +8,7 @@
 stream-shougi-board.exe
 ├─ main thread: タスクトレイのメッセージループ (Windows のみ)
 └─ server thread: tokio runtime
-      ├─ hub: 正規の盤面 + 持ち駒 + 表示設定 + 履歴
+      ├─ hub: 正規の盤面 (将棋・囲碁それぞれ) + 表示設定 + 履歴
       │     └─ app/src/session.rs の reducer で全コマンドを直列に適用
       └─ axum: 127.0.0.1 の HTTP と /ws
             ├─ 静的アセット (rust-embed で exe へ埋め込み)
@@ -40,16 +40,27 @@ stream-shougi-board.exe
 
 | | 責務 |
 | --- | --- |
-| `app/` | 盤面モデル、SFEN、コマンド reducer、プロトコル、loopback サーバー、設定、タスクトレイ |
+| `app/` | 盤面モデル (将棋・囲碁)、SFEN / SGF、コマンド reducer、プロトコル、loopback サーバー、設定、タスクトレイ |
 | `client/` | 操作画面と盤面ページ。SVG の描画器は 2 つのページで共有する |
 | `protocol-fixtures/` | Rust が書き出し client のテストが読む snapshot。両側のずれを検出する |
 
-クライアントは盤面ロジックを持ちません。`client/src/shogi.ts` は表示側の型と純粋な補助関数だけ、
-`client/src/protocol.ts` は `app/src/protocol.rs` の写しです。プロトコルを変えたときは
-`protocol-fixtures/snapshot.json` を作り直し、両側のテストが通ることで整合を担保します。
+クライアントは盤面ロジックを持ちません。`client/src/shogi.ts` と `client/src/go.ts` は表示側の型と
+純粋な補助関数だけ、`client/src/protocol.ts` は `app/src/protocol.rs` の写しです。プロトコルを変えたときは
+`protocol-fixtures/` の snapshot (将棋と囲碁で 1 つずつ) を作り直し、両側のテストが通ることで整合を担保します。
 
-`client/src/Board/component.tsx` は操作画面と盤面ページの両方で、**同じ view 設定のまま**
-描かれます。手元のプレビューがそのまま OBS の出力になり、別々に調整する必要がありません。
+## 将棋と囲碁
+
+`Session` は将棋の履歴と囲碁の履歴を両方持ち、モードはどちらを snapshot に載せるかだけを決めます。
+配信中に切り替えて戻っても、どちらの局面も消えません。snapshot の `game` は `mode` で見分ける
+タグ付きの形で、将棋なら盤・選択・SFEN、囲碁なら盤・SGF を運びます。モードの違うコマンド
+(囲碁モード中の `tap_square` など) は拒否します。
+
+囲碁も将棋と同じく編集盤で、コウや着手禁止点は判定しません。ただ**取りだけは自動で処理します**。
+囲んだ石を手で 1 つずつ消すのは並べる作業として意味が無く、取り忘れた盤がそのまま配信に出ると
+誤った局面を見せることになるためです (`app/src/go.rs`)。
+
+`client/src/Board/component.tsx` (将棋) と `client/src/Board/GoBoard.tsx` (囲碁) は、操作画面と
+盤面ページの両方で**同じ view 設定のまま**描かれます。手元のプレビューがそのまま OBS の出力になり、別々に調整する必要がありません。
 
 ## 駒の描画
 

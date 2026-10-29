@@ -277,13 +277,18 @@ const PROBE_BOARD_SIZE = 900;
  * 余白以外の寸法 (駒台・隙間・座標の帯) はすべて盤に比例するので、
  * 余白 0 で一度組んでみて、その縦横が盤の何倍になるかを測ってから割る。
  * 比率を式で持たずに実際のレイアウトへ聞くことで、配置を変えても追従する。
+ * 碁盤のように別の配置を使うときは、その配置計算を layout に渡す。
  */
 export function boardSizeToFit(
   view: ViewSettings,
   width: number,
   height: number,
+  layout: (
+    view: ViewSettings,
+    boardSize: number,
+  ) => { width: number; height: number } = computeLayout,
 ): number {
-  const probe = computeLayout({ ...view, margin: 0 }, PROBE_BOARD_SIZE);
+  const probe = layout({ ...view, margin: 0 }, PROBE_BOARD_SIZE);
   const widthPerBoard = probe.width / PROBE_BOARD_SIZE;
   const heightPerBoard = probe.height / PROBE_BOARD_SIZE;
 

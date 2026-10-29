@@ -5,7 +5,12 @@ import fixture from "../../../protocol-fixtures/snapshot.json";
 import { ShogiBoard } from "./component";
 import { BoardStage } from "./Stage";
 
-const snapshot = fixture as Snapshot;
+const snapshot = fixture as unknown as Snapshot;
+
+if (snapshot.game.mode !== "shogi") {
+  throw new Error("snapshot.json は将棋の局面のはず");
+}
+const game = snapshot.game;
 
 describe("OBSへの表示切り替え", () => {
   test("非表示では不透明な背景・盤・持ち駒をすべて描画しない", () => {
@@ -41,10 +46,10 @@ describe("OBSへの表示切り替え", () => {
   test("OBS非表示中でも操作画面の盤と駒を描画する", () => {
     const html = renderToStaticMarkup(
       <ShogiBoard
-        board={snapshot.board}
+        board={game.board}
         view={{ ...snapshot.view, visible: false }}
         boardSize={540}
-        selection={snapshot.selection}
+        selection={game.selection}
         showSelection={true}
       />,
     );

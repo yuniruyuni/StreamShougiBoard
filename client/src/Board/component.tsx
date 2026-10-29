@@ -70,9 +70,10 @@ function grainLines(): GrainLine[] {
   }));
 }
 
-const GRAIN = grainLines();
+/** 碁盤も同じ木目を使う。 */
+export const GRAIN = grainLines();
 
-const COORD_FONT =
+export const COORD_FONT =
   '"Yu Gothic", YuGothic, "Hiragino Sans", "Noto Sans JP", sans-serif';
 
 export interface BoardHandlers {
