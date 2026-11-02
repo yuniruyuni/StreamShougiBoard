@@ -15,7 +15,7 @@
 - [ ] 公開 Web サービス、ログイン、外部 DB、LAN listener を意図せず追加していません。
 - [ ] 合法手の判定・王手の検出・手番の強制を追加していません（盤面編集ツールとしての境界）。
 - [ ] プロトコルを変えた場合、`app/src/protocol.rs` と `client/src/protocol.ts` と
-      `docs/protocol.md` を同時に更新し、`UPDATE_PROTOCOL_FIXTURES=1 cargo test` で
-      fixture も作り直しました。
+  `docs/protocol.md` を同時に更新し、`UPDATE_PROTOCOL_FIXTURES=1 cargo test` で
+  fixture も作り直しました。
 - [ ] 配布物に入る依存を足した場合、`bun run generate:licenses` が通ることを確認しました。
 - [ ] ユーザーデータや秘密情報をコミットしていません。

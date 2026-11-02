@@ -14,10 +14,10 @@ LGPL-2.1 の JavaScriptCore が必ず付いてきます。
 
 ## 配布物に入る第三者コンポーネント
 
-| コンポーネント | 含まれ方 | ライセンス |
-| --- | --- | --- |
-| Cargo の実行時依存 (axum / tokio / serde / rust-embed / windows など) | 実行ファイル本体へ静的リンク | MIT / Apache-2.0 / BSD / Unicode-3.0 など |
-| react / react-dom / scheduler | JS バンドル (`control.js` / `board.js`) | MIT |
+| コンポーネント                                                        | 含まれ方                                | ライセンス                                |
+| --------------------------------------------------------------------- | --------------------------------------- | ----------------------------------------- |
+| Cargo の実行時依存 (axum / tokio / serde / rust-embed / windows など) | 実行ファイル本体へ静的リンク            | MIT / Apache-2.0 / BSD / Unicode-3.0 など |
+| react / react-dom / scheduler                                         | JS バンドル (`control.js` / `board.js`) | MIT                                       |
 
 `build-dependencies` と `dev-dependencies`、npm の `devDependencies` はビルドにしか使わないので
 対象外です。

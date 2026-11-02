@@ -28,7 +28,7 @@
     "watch:run": "bun scripts/watch.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.14"
+    "@biomejs/biome": "2.6.4"
   },
   "trustedDependencies": [
     "@biomejs/biome"
