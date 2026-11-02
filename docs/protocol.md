@@ -44,13 +44,25 @@ Origin を検証します ([security.md](security.md))。
   "type": "snapshot",
   "appVersion": "0.1.0",
   "rev": 12,
-  "view": { "backgroundColor": "black", "backgroundOpacity": 0, "margin": 16, "…": "" },
+  "view": {
+    "backgroundColor": "black",
+    "backgroundOpacity": 0,
+    "margin": 16,
+    "…": ""
+  },
   "history": { "index": 2, "length": 3 },
   "game": {
     "mode": "shogi",
     "board": {
-      "squares": [null, { "id": "p3", "kind": "N", "promoted": false, "side": "w" }, "…81 要素"],
-      "hands": { "b": { "R": [], "B": [], "G": [], "S": [], "N": [], "L": [], "P": [] }, "w": {} },
+      "squares": [
+        null,
+        { "id": "p3", "kind": "N", "promoted": false, "side": "w" },
+        "…81 要素"
+      ],
+      "hands": {
+        "b": { "R": [], "B": [], "G": [], "S": [], "N": [], "L": [], "P": [] },
+        "w": {}
+      },
       "turn": "b",
       "moveNumber": 3,
       "lastMove": { "from": 60, "to": 51 }

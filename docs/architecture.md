@@ -38,11 +38,11 @@ stream-shougi-board.exe
 
 ## ワークスペース
 
-| | 責務 |
-| --- | --- |
-| `app/` | 盤面モデル (将棋・囲碁)、SFEN / SGF、コマンド reducer、プロトコル、loopback サーバー、設定、タスクトレイ |
-| `client/` | 操作画面と盤面ページ。SVG の描画器は 2 つのページで共有する |
-| `protocol-fixtures/` | Rust が書き出し client のテストが読む snapshot。両側のずれを検出する |
+|                      | 責務                                                                                                     |
+| -------------------- | -------------------------------------------------------------------------------------------------------- |
+| `app/`               | 盤面モデル (将棋・囲碁)、SFEN / SGF、コマンド reducer、プロトコル、loopback サーバー、設定、タスクトレイ |
+| `client/`            | 操作画面と盤面ページ。SVG の描画器は 2 つのページで共有する                                              |
+| `protocol-fixtures/` | Rust が書き出し client のテストが読む snapshot。両側のずれを検出する                                     |
 
 クライアントは盤面ロジックを持ちません。`client/src/shogi.ts` と `client/src/go.ts` は表示側の型と
 純粋な補助関数だけ、`client/src/protocol.ts` は `app/src/protocol.rs` の写しです。プロトコルを変えたときは
