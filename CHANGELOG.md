@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-02
+
 - 囲碁モードを追加。操作画面の「ゲーム」で将棋と切り替え、それぞれの局面と履歴は切り替えても残る。
   最後に使ったゲームは次の起動に引き継ぐ。
   - 19・13・9 路。クリックで手番の石を交互に置き、Shift で黒だけ、Ctrl (Mac は ⌘) で白だけを手番を変えずに並べ、
@@ -17,6 +19,10 @@
 - トレイに「Windows 起動時に開始」を追加。現在のユーザーの Run へ登録し、チェックはレジストリを読んで出す。
 - Windows マニフェストの埋め込みを `set_manifest_file` へ変更し、「サイドバイサイド構成が正しくありません」で起動できない問題を修正。生成した exe を CI・リリース・配置の各時点で検査する。
 - `bun run deploy` で常駐先へ exe を配置。常駐中は中止し、直前の exe を残す。
+- 盤面の非表示 (`view.visible=false`) を設定・プロトコル・操作画面・盤面ページに通し、再起動後も保持する。
+  非表示の間は背景ごと描かない。
+- 依存を更新。tokio 1.54.1 (1.53.3 のセキュリティ修正を含む) ほか Cargo 依存、ビルドに使う Bun 1.4.4、Rust 1.99.1、
+  Biome 2.6.4、GitHub Actions の pin 先。
 
 ## [0.2.0] - 2026-09-12
 
@@ -50,6 +56,7 @@
   tooltip に OBS 側の接続数を出す。
 - 配布する exe に入る第三者コンポーネントのライセンスページ（`/licenses`）。
 
-[Unreleased]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/yuniruyuni/StreamShougiBoard/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yuniruyuni/StreamShougiBoard/releases/tag/v0.1.0
