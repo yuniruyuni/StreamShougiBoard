@@ -5,6 +5,10 @@
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-02
+
+- lock file maintenance で、`bun.lock` の依存を互換範囲の最新版へ更新。
+
 ## [0.2.1] - 2026-11-02
 
 - 囲碁モードを追加。操作画面の「ゲーム」で将棋と切り替え、それぞれの局面と履歴は切り替えても残る。
@@ -56,7 +60,8 @@
   tooltip に OBS 側の接続数を出す。
 - 配布する exe に入る第三者コンポーネントのライセンスページ（`/licenses`）。
 
-[Unreleased]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/yuniruyuni/StreamShougiBoard/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/yuniruyuni/StreamShougiBoard/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yuniruyuni/StreamShougiBoard/releases/tag/v0.1.0
